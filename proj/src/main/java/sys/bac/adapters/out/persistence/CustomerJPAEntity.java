@@ -1,22 +1,32 @@
 package sys.bac.adapters.out.persistence;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Positive;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 
 @Entity
+@Table(name = "Customer")
 public class CustomerJPAEntity {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Positive
     private long customerId;
 
+    @Column(nullable = false)
     private String surname;
+
+    @Column(nullable = false)
     private String name;
+
     private String eMail;
+
     private String phone;
 
-    public CustomerJPAEntity() {}
+    public CustomerJPAEntity() {
+    }
 
     public long getId() {
         return customerId;

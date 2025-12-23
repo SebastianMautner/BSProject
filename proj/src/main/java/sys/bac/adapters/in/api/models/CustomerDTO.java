@@ -1,7 +1,9 @@
 package sys.bac.adapters.in.api.models;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "customer")
 public class CustomerDTO extends AbstractDataTransferObject{
     
     @NotBlank
