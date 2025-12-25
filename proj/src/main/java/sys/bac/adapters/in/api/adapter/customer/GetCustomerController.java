@@ -1,29 +1,34 @@
 package sys.bac.adapters.in.api.adapter.customer;
 
+import java.util.Optional;
+
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import sys.bac.adapters.in.api.adapter.customer.CustomerServiceAdapter;
 import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.port.in.GetCustomerByIdUseCase;
 
 @Path("/customers")
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
 public class GetCustomerController {
 
     private GetCustomerByIdUseCase gCBIUC;
 
-    private UriInfo uriInfo;
-
-    @GET
-    public Response getCustomerById(@Positive @PathParam("customerId")long cId) {
-        final CustomerDTO customer = gCBIUC.loadCustomerById(new LongId(cId)).getCustomerDTO();
-        linkSelf(customer);
+    public GetCustomerController(GetCustomerByIdUseCase gCBIUC) {
+        this.gCBIUC = gCBIUC;
     }
 
-    private void linkSelf(CustomerDTO cDTO) {
+    @GET
+    public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
+        Optional<CustomerDTO> customer;
+        
+            customer = gCBIUC.loadCustomerById(new LongId(cId));
+            if (customer.isPresent()) {
+                return new CustomerResult(customer.get());
+            } else {
+                throw new NotFoundException(Response.status(Response.Status.NOT_FOUND).entity(Response.Status.NOT_FOUND.getStatusCode() + "No customer with Id " + cId).build());
+            }
     }
 }

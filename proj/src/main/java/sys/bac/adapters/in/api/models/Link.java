@@ -38,6 +38,11 @@ public class Link {
     }
 
     public String toString() {
-        return "Link {href='" + href + "', rel='" + rel + "', type='" + type + "'}";
+        return "Link {href=" + href + "; rel=\"" + rel + "\"; type=\"" + type + "\"}";
+    }
+
+    public static void main(String[] args) {
+        Link test = new Link("test/test", "args", "application/json");
+        System.out.println(test);
     }
 }

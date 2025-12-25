@@ -1,11 +1,21 @@
 package sys.bac.application.domain.customer;
 
-import sys.bac.application.domain.models.LongId;
-import sys.bac.application.domain.results.CustomerResult;
-import sys.bac.application.port.in.GetCustomerByIdUseCase;
+import java.util.Optional;
 
-public class GetCustomerService implements GetCustomerByIdUseCase{
-    public sys.bac.application.domain.results.CustomerResult loadCustomerById(LongId cId) {
-        return 
+import sys.bac.adapters.in.api.models.CustomerDTO;
+import sys.bac.application.domain.models.LongId;
+import sys.bac.application.port.in.GetCustomerByIdUseCase;
+import sys.bac.application.port.out.CustomerRepository;
+
+public class GetCustomerService implements GetCustomerByIdUseCase{ // might unify the Services in to one class
+    
+    private final CustomerRepository customerRepo;
+
+    public GetCustomerService(CustomerRepository customerRepo) {
+        this.customerRepo = customerRepo;
+    }
+
+    public Optional<CustomerDTO> loadCustomerById(LongId cId) {
+        return customerRepo.getCustomerById(cId);
     }
 }
