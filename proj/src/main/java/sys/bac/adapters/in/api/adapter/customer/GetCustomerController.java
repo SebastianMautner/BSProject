@@ -14,13 +14,14 @@ import sys.bac.application.port.in.GetCustomerByIdUseCase;
 @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
 public class GetCustomerController {
 
-    private GetCustomerByIdUseCase gCBIUC;
+    private final GetCustomerByIdUseCase gCBIUC;
 
     public GetCustomerController(GetCustomerByIdUseCase gCBIUC) {
         this.gCBIUC = gCBIUC;
     }
 
     @GET
+    @Path("{cId}")
     public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
         Optional<CustomerDTO> customer;
         

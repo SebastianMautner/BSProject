@@ -1,33 +1,21 @@
 package sys.bac.adapters.in.api.models;
 
 import java.io.Serializable;
+import jakarta.validation.constraints.Positive;
+import sys.bac.application.domain.models.LongId;
 
-import jakarta.validation.constraints.PositiveOrZero;
-
-public abstract class AbstractDataTransferObject implements Serializable {
-    
-    @PositiveOrZero
-    protected long primaryId;
-
-    @PositiveOrZero
-    private long id;
+public abstract class AbstractDataTransferObject implements Serializable { // apparently there's also a primary id, seperate from the id, idk why tho
+    @Positive
+    protected LongId id;
     
 
     protected Link self;
 
-    public long getPId() {
-        return primaryId;
-    }
-
-    public void setPId(long pId) {
-        primaryId = pId;
-    }
-
-    public long getId() {
+    public LongId getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(LongId id) {
         this.id = id;
     }
 

@@ -4,6 +4,7 @@ import sys.bac.application.domain.models.LongId;
 
 public class Customer {
     private LongId customerId;
+    
     private String surname;
 
     private String name;
@@ -14,6 +15,22 @@ public class Customer {
 
     public Customer() {
         this.customerId = new LongId();
+    }
+
+    public Customer(LongId id, String surname, String name, String eMail, String phone) {
+        customerId = id;
+        this.surname = surname;
+        this.name = name;
+        this.eMail = eMail;
+        this.phone = phone;
+    }
+
+    public Customer(long id, String surname, String name, String eMail, String phone) {
+        customerId = new LongId(id);
+        this.surname = surname;
+        this.name = name;
+        this.eMail = eMail;
+        this.phone = phone;
     }
 
     public LongId getcustomerId() {

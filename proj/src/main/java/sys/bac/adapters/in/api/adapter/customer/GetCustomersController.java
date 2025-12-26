@@ -13,9 +13,10 @@ import jakarta.ws.rs.core.Response;
 import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.application.port.in.GetCustomersUseCase;
 
-@Path("/Customers")
+@Path("/customers")
 @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
 public class GetCustomersController {
+    
     private final GetCustomersUseCase gCUC;
 
     public GetCustomersController(GetCustomersUseCase gCUC) {
