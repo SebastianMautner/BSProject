@@ -24,3 +24,15 @@ proj (Main folder of the project, including files such as pom.xml)
 |       ├── docker (docker config for tests)
 |       └── java\sys\bac (the actual tests)
 └── target (the bin files (has a structure, but thats auto generated))
+
+TODO:
+Order: everything
+Devices: everything
+Customer: JPA Adapter, some more mult options
+Pagination
+Exceptions
+the actual server
+Quarkus
+Docker
+probably more
+Results + HTTP
