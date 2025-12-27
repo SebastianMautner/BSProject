@@ -10,8 +10,6 @@ public class PostCustomerController {
     
     private final PostCustomerUseCase pCUC;
 
-    private final Mapper mapper = new Mapper();
-
     public PostCustomerController(PostCustomerUseCase pCUC) {
         this.pCUC =pCUC;
     }
@@ -19,6 +17,6 @@ public class PostCustomerController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON) //XML
     public void postCustomer(CustomerDTO customer) {
-        pCUC.createCustomer(mapper.fromDTO(customer));
+        pCUC.createCustomer(customer);
     }
 }

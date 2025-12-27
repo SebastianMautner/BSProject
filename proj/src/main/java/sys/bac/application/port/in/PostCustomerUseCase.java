@@ -1,7 +1,7 @@
 package sys.bac.application.port.in;
 
-import sys.bac.application.domain.models.customer.Customer;
+import sys.bac.adapters.in.api.models.CustomerDTO;
 
 public interface PostCustomerUseCase {
-    public void createCustomer(Customer customer);
+    public void createCustomer(CustomerDTO customer);
 }

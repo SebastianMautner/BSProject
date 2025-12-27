@@ -12,7 +12,7 @@ public class DeleteCustomerService implements DeleteCustomerUseCase{
         this.customerRepo = customerRepo;
     }
 
-    public void deleteCustomer(LongId id) {
-        customerRepo.delete(id);
+    public void deleteCustomer(long id) {
+        customerRepo.delete(new LongId(id));
     }
 }

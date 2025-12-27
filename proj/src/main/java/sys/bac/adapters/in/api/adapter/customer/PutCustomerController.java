@@ -14,8 +14,6 @@ public class PutCustomerController {
 
     private final PutCustomerUseCase pCUC;
 
-    private final Mapper mapper = new Mapper();
-
     public PutCustomerController(PutCustomerUseCase pCUC) {
         this.pCUC = pCUC;
     }
@@ -24,6 +22,6 @@ public class PutCustomerController {
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON) //XML
     public void updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
-        pCUC.updateCustomer(mapper.fromDTO(customer));
+        pCUC.updateCustomer(customer);
     }
 }

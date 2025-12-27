@@ -5,7 +5,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import sys.bac.adapters.in.api.models.CustomerDTO;
-import sys.bac.application.domain.models.LongId;
 import sys.bac.application.port.in.GetCustomerByIdUseCase;
 
 @Path("/customers")
@@ -23,7 +22,7 @@ public class GetCustomerController {
     public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
         CustomerDTO customer;
             try {
-                customer = gCBIUC.loadCustomerById(new LongId(cId));
+                customer = gCBIUC.loadCustomerById(cId);
             }
             catch ( NotFoundException e) {
                 throw new NotFoundException(Response.status(Response.Status.NOT_FOUND).entity(Response.Status.NOT_FOUND.getStatusCode() + "No customer with Id " + cId).build());

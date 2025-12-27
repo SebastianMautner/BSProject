@@ -21,10 +21,10 @@ public class GetCustomerService implements GetCustomerByIdUseCase{ // might unif
         this.mapper = new Mapper();
     }
 
-    public CustomerDTO loadCustomerById(LongId cId) {
-        Optional<Customer> customer = customerRepo.getCustomerById(cId);
+    public CustomerDTO loadCustomerById(long cId) {
+        Optional<Customer> customer = customerRepo.getCustomerById(new LongId(cId));
         if(customer.isPresent()) {
-            return mapper.toDTO(customerRepo.getCustomerById(cId).get());
+            return mapper.toDTO(customer.get());
         }
         else {
             throw new NotFoundException("No Customer");

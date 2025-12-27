@@ -4,7 +4,6 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import sys.bac.application.domain.models.LongId;
 import sys.bac.application.port.in.DeleteCustomerUseCase;
 
 @Path("/customers")
@@ -22,6 +21,6 @@ public class DeleteCustomerController {
         if (id == -1) {
             throw new IllegalArgumentException("400 No Id Specified"); // not final
         }
-        dCUC.deleteCustomer(new LongId(id));
+        dCUC.deleteCustomer(id);
     }
 }
