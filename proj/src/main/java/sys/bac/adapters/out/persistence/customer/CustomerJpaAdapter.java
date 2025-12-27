@@ -42,7 +42,15 @@ public class CustomerJpaAdapter implements CustomerRepository{
     }
 
     public void delete(LongId id) {
-        //TODO
+        try (EntityManager eM = eMF.createEntityManager();){
+            EntityTransaction eT = eM.getTransaction();
+            eT.begin();
+            eM.remove(eM.find(CustomerJPAEntity.class, id.getId()));
+            eT.commit();
+        }
+        catch(Exception e) {
+            throw new RuntimeException("FUCK"); //WIP
+        }
     }
 
     public void update(Customer customer) {
