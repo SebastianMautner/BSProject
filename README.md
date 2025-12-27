@@ -29,6 +29,7 @@ TODO:
 Order: everything
 Devices: everything
 Customer: JPA Adapter, some more mult options
+Dispatcher Service
 Pagination
 Exceptions
 the actual server
