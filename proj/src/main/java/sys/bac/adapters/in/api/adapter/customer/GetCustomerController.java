@@ -1,7 +1,5 @@
 package sys.bac.adapters.in.api.adapter.customer;
 
-import java.util.Optional;
-
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -23,13 +21,13 @@ public class GetCustomerController {
     @GET
     @Path("{cId}")
     public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
-        Optional<CustomerDTO> customer;
-        
-            customer = gCBIUC.loadCustomerById(new LongId(cId));
-            if (customer.isPresent()) {
-                return new CustomerResult(customer.get());
-            } else {
+        CustomerDTO customer;
+            try {
+                customer = gCBIUC.loadCustomerById(new LongId(cId));
+            }
+            catch ( NotFoundException e) {
                 throw new NotFoundException(Response.status(Response.Status.NOT_FOUND).entity(Response.Status.NOT_FOUND.getStatusCode() + "No customer with Id " + cId).build());
             }
+            return new CustomerResult(customer);
     }
 }
