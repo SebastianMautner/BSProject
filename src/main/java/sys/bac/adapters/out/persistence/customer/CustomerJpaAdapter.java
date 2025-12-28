@@ -5,29 +5,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
 import sys.bac.application.port.out.CustomerRepository;
 
+@ApplicationScoped
 public class CustomerJpaAdapter implements CustomerRepository{
 
-    private final Mapper mapper;
+    private Mapper mapper = new Mapper();
 
-    private final EntityManagerFactory eMF;
-
-    public CustomerJpaAdapter(Mapper mapper, EntityManagerFactory entityManagerFactory) {
-        this.mapper = mapper;
-        this.eMF = entityManagerFactory;
-    }
+    @Inject
+    private EntityManager eM;
 
     public void create(Customer customer) {
-        try (EntityManager eM = eMF.createEntityManager();){
+        try {
             EntityTransaction eT = eM.getTransaction();
             eT.begin();
             eM.persist(mapper.toJPA(customer));
@@ -40,7 +39,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
 
     public List<Customer> getAllCustomers(String query) {
         List<Customer> list = new ArrayList<>();
-        try (EntityManager eM = eMF.createEntityManager()) {
+        try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
@@ -55,7 +54,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
 
     public Optional<Customer> getCustomerById(LongId id) {
         Optional<Customer> result;
-        try (EntityManager eM = eMF.createEntityManager()) {
+        try {
             EntityTransaction eT = eM.getTransaction();
             eT.begin();
             result = Optional.of(mapper.toCustomer(eM.find(CustomerJPAEntity.class, id.getId())));
@@ -68,7 +67,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
     }
 
     public void delete(LongId id) {
-        try (EntityManager eM = eMF.createEntityManager();){
+        try {
             EntityTransaction eT = eM.getTransaction();
             eT.begin();
             eM.remove(eM.find(CustomerJPAEntity.class, id.getId()));
@@ -80,7 +79,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
     }
 
     public void update(LongId id, Customer customer) {
-        try (EntityManager eM = eMF.createEntityManager();){
+        try {
             EntityTransaction eT = eM.getTransaction();
             eT.begin();
             CustomerJPAEntity c = eM.find(CustomerJPAEntity.class, id.getId());
