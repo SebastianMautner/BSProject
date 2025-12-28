@@ -35,5 +35,6 @@ Exceptions
 the actual server
 Quarkus
 Docker
-probably more
 Results + HTTP
+Caching
+probably more
