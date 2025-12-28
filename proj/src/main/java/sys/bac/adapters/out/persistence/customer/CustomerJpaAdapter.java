@@ -1,11 +1,16 @@
 package sys.bac.adapters.out.persistence.customer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
 import sys.bac.application.port.out.CustomerRepository;
@@ -33,12 +38,33 @@ public class CustomerJpaAdapter implements CustomerRepository{
         }
     }
 
-    public List<Customer> getCustomers(String query) {
-        return null; // TODO
+    public List<Customer> getAllCustomers(String query) {
+        List<Customer> list = new ArrayList<>();
+        try (EntityManager eM = eMF.createEntityManager()) {
+            CriteriaBuilder cB = eM.getCriteriaBuilder();
+            CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
+            Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
+            cQ.select(root);
+            list = eM.createQuery(cQ).getResultList().stream().map(result -> mapper.toCustomer(result)).collect(Collectors.toList());
+        }
+        catch ( Exception e) {
+            throw new RuntimeException("FUCK"); //WIP
+        }
+        return list;
     }
 
     public Optional<Customer> getCustomerById(LongId id) {
-        return null;// TODO
+        Optional<Customer> result;
+        try (EntityManager eM = eMF.createEntityManager()) {
+            EntityTransaction eT = eM.getTransaction();
+            eT.begin();
+            result = Optional.of(mapper.toCustomer(eM.find(CustomerJPAEntity.class, id.getId())));
+            eT.commit();
+        }
+        catch ( Exception e) {
+            throw new RuntimeException("FUCK"); //WIP
+        }
+        return result;
     }
 
     public void delete(LongId id) {
@@ -53,7 +79,21 @@ public class CustomerJpaAdapter implements CustomerRepository{
         }
     }
 
-    public void update(Customer customer) {
-        //TODO
+    public void update(LongId id, Customer customer) {
+        try (EntityManager eM = eMF.createEntityManager();){
+            EntityTransaction eT = eM.getTransaction();
+            eT.begin();
+            CustomerJPAEntity c = eM.find(CustomerJPAEntity.class, id.getId());
+            eM.detach(c);
+            c.setSurname(customer.getSurname());
+            c.setFirstName(customer.getName());
+            c.setEMail(customer.getEMail());
+            c.setPhone(customer.getPhone());
+            eM.merge(c);
+            eT.commit();
+        }
+        catch(Exception e) {
+            throw new RuntimeException("FUCK"); //WIP
+        }
     }
 }

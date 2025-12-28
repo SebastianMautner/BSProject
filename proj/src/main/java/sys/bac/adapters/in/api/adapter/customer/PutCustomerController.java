@@ -22,6 +22,6 @@ public class PutCustomerController {
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON) //XML
     public void updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
-        pCUC.updateCustomer(customer);
+        pCUC.updateCustomer(id, customer);
     }
 }

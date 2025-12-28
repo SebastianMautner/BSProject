@@ -19,6 +19,6 @@ public class GetCustomersService implements GetCustomersUseCase{ // might unify 
     }
 
     public List<CustomerDTO> findCustomers(String query) {
-        return customerRepo.getCustomers(query).stream().map(mapper::toDTO).collect(Collectors.toList());
+        return customerRepo.getAllCustomers(query).stream().map(mapper::toDTO).collect(Collectors.toList());
     }
 }   

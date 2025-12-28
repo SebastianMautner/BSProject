@@ -7,7 +7,7 @@ import sys.bac.application.domain.models.customer.Customer;
 
 public interface CustomerRepository {
 
-    List<Customer> getCustomers(String query);
+    List<Customer> getAllCustomers(String query); //Query idk
 
     void create(Customer customer);
 
@@ -15,5 +15,5 @@ public interface CustomerRepository {
 
     void delete(LongId id);
 
-    void update(Customer customer); //maybe not void, idk
+    void update(LongId id, Customer customer); //maybe not void, idk
 }
