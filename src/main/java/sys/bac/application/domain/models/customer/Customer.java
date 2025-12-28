@@ -33,7 +33,11 @@ public class Customer {
         this.phone = phone;
     }
 
-    public LongId getcustomerId() {
+    public long getcustomerId() {
+        return customerId.getId();
+    }
+
+    public LongId getLongId() {
         return customerId;
     }
 
