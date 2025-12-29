@@ -1,11 +1,11 @@
 package sys.bac.adapters.in.api.models;
 
 import java.io.Serializable;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 
 public abstract class AbstractDataTransferObject implements Serializable { // apparently there's also a primary id, seperate from the id, idk why tho
-    @Positive
+    @PositiveOrZero
     protected long id;
     
 

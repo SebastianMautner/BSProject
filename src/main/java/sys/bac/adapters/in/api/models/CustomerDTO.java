@@ -12,10 +12,8 @@ public class CustomerDTO extends AbstractDataTransferObject{
     @NotBlank
     private String name;
     
-    @NotBlank
     private String eMail;
     
-    @NotBlank
     private String phone;
     
     public CustomerDTO() {

@@ -12,9 +12,10 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-
+import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
+import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.port.out.CustomerRepository;
 
 @ApplicationScoped
@@ -25,19 +26,23 @@ public class CustomerJpaAdapter implements CustomerRepository{
     @Inject
     private EntityManager eM;
 
-    public void create(Customer customer) {
+    @Transactional
+    public NoContentResult create(Customer customer) {
+        long id = -1;
+        NoContentResult result = new NoContentResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
-            eM.persist(mapper.toJPA(customer));
-            eT.commit();
+            CustomerJPAEntity c = mapper.toJPA(customer);
+            eM.persist(c);
+            id = c.getId();
         }
         catch(Exception e) {
-            throw new RuntimeException("FUCK"); //WIP
+            result.setError(500, e.getMessage());
         }
+        result.setId(id);
+        return result;
     }
 
-    public List<Customer> getAllCustomers(String query) {
+    public List<Customer> getAllCustomers() {
         List<Customer> list = new ArrayList<>();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
@@ -66,7 +71,8 @@ public class CustomerJpaAdapter implements CustomerRepository{
         return result;
     }
 
-    public void delete(LongId id) {
+    public NoContentResult delete(LongId id) {
+        NoContentResult result = new NoContentResult();
         try {
             EntityTransaction eT = eM.getTransaction();
             eT.begin();
@@ -74,8 +80,9 @@ public class CustomerJpaAdapter implements CustomerRepository{
             eT.commit();
         }
         catch(Exception e) {
-            throw new RuntimeException("FUCK"); //WIP
+            result.setError(500, "Internal Server Error");
         }
+        return result;
     }
 
     public void update(LongId id, Customer customer) {

@@ -5,7 +5,12 @@ import sys.bac.application.domain.models.customer.Customer;
 public class Mapper {
 
     public CustomerJPAEntity toJPA(Customer c) {
-        return new CustomerJPAEntity(c.getLongId(), c.getSurname(), c.getName(), c.getEMail(), c.getPhone());
+        CustomerJPAEntity result = new CustomerJPAEntity();
+        result.setSurname(c.getSurname());
+        result.setFirstName(c.getName());
+        result.setEMail(c.getEMail());
+        result.setPhone(c.getPhone());
+        return result;
     }
 
     public Customer toCustomer(CustomerJPAEntity c) {

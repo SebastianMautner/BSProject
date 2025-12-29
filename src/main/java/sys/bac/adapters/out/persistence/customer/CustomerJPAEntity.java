@@ -3,17 +3,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Positive;
-import sys.bac.application.domain.models.LongId;
+
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 @Entity
 @Table(name = "Customer")
 public class CustomerJPAEntity {
     
     @Id
-    @GeneratedValue
-    @Positive
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long customerId;
 
     @Column(nullable = false)
@@ -29,8 +28,7 @@ public class CustomerJPAEntity {
     public CustomerJPAEntity() {
     }
 
-    public CustomerJPAEntity(LongId id, String surname, String name, String eMail, String phone) {
-        this.customerId = id.getId();
+    public CustomerJPAEntity(String surname, String name, String eMail, String phone) {
         this.surname = surname;
         this.name = name;
         this.eMail = eMail;

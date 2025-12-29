@@ -22,7 +22,7 @@ public class GetCustomersService implements GetCustomersUseCase{ // might unify 
         mapper = new Mapper();
     }
 
-    public List<CustomerDTO> findCustomers(String query) {
-        return customerRepo.getAllCustomers(query).stream().map(mapper::toDTO).collect(Collectors.toList());
+    public List<CustomerDTO> findCustomers() {
+        return customerRepo.getAllCustomers().stream().map(mapper::toDTO).collect(Collectors.toList());
     }
 }   

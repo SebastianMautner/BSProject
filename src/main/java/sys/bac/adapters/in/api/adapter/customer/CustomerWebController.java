@@ -4,34 +4,37 @@ package sys.bac.adapters.in.api.adapter.customer;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
+
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.Consumes;
 
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.ClientErrorException;
 
 import jakarta.inject.Inject;
 
 import java.util.List;
 
 import sys.bac.adapters.in.api.models.CustomerDTO;
-
+import sys.bac.adapters.in.api.models.Link;
 import sys.bac.application.port.in.PostCustomerUseCase;
 import sys.bac.application.port.in.GetCustomersUseCase;
 import sys.bac.application.port.in.GetCustomerByIdUseCase;
 import sys.bac.application.port.in.PutCustomerUseCase;
+import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.port.in.DeleteCustomerUseCase;
 
 
-@Path("/customers")
+@Path("customers")
 public class CustomerWebController {
     
     @Inject
@@ -49,40 +52,39 @@ public class CustomerWebController {
     @Inject
     private DeleteCustomerUseCase dCUC;
 
+    @Context
+    UriInfo uriInfo;
+    
     @GET
-    @Path("/{cId}")
+    @Path("{cId}")
     @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
     public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
         CustomerDTO customer;
-            try {
-                customer = gCBIUC.loadCustomerById(cId);
-            }
-            catch ( NotFoundException e) {
-                throw new NotFoundException(Response.status(Response.Status.NOT_FOUND).entity(Response.Status.NOT_FOUND.getStatusCode() + "No customer with Id " + cId).build());
-            }
-            return new CustomerResult(customer);
+        customer = gCBIUC.loadCustomerById(cId);
+        return new CustomerResult(customer);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
-    public CustomersResult getAllCustomers(@DefaultValue("") @QueryParam("query") String query) { // pagination
-        List<CustomerDTO> result;
-        // The Method-Path for this method is the following:
-        // Controller->Use Case -(implemented by)> Service -> Repo -(implemented by)> JpaAdapter
-        try {
-            result = gCUC.findCustomers(query);
-        }
-        catch(IllegalArgumentException e) {
-            throw new ClientErrorException(Response.status(Response.Status.BAD_REQUEST).entity(Response.Status.BAD_REQUEST.getStatusCode() + "Invalid 'query'").build()); // amazing line btw (only took like 5 minutes)
-        }
-
-        return new CustomersResult(result);
+    public Response getAllCustomers() { // pagination
+        List<CustomerDTO> customers;
+            customers = gCUC.findCustomers();
+        customers.stream().forEach(c -> c.setSelf(new Link(uriInfo.getBaseUriBuilder()
+                                                                  .path(CustomerWebController.class)
+                                                                  .build(c.getId()).toASCIIString(), "getCustomerWithId" + c.getId(), "application/json")));
+        return Response.ok(customers).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON) //XML
-    public void postCustomer(CustomerDTO customer) {
-        poCUC.createCustomer(customer);
+    public Response postCustomer(@Valid CustomerDTO customer) {
+        
+        NoContentResult result = poCUC.createCustomer(customer);
+        if(result.hasError()) {
+            return Response.ok(result.getMessage() + "\nTHIS IS NOT 200 OK!").build();
+        }
+        return Response.status(Response.Status.CREATED).header("Location", uriInfo.getRequestUriBuilder().path(Long.toString(result.getId())).build()).build();
+        //return Response.status(Response.Status.CREATED).header("Location:" uriInfo.getAbsolutePath().path(Long.toString(0))).build(); 
     }
 
     @PUT

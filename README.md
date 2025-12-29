@@ -28,13 +28,11 @@ proj (Main folder of the project, including files such as pom.xml)
 TODO:
 Order: everything
 Devices: everything
-Customer: JPA Adapter, some more mult options
+Customer: some more mult options
 Dispatcher Service
 Pagination
 Exceptions
-the actual server
-Quarkus
-Docker
+Docker?
 Results + HTTP
 Caching
 probably more

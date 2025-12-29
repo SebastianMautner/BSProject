@@ -1,5 +1,7 @@
 package sys.bac.adapters.in.api.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Link {
     private String href;
     private String rel;
@@ -36,13 +38,12 @@ public class Link {
     public void setType(String type) {
         this.type = type;
     }
+    @JsonIgnore
+    public String getHeaderLink() {
+        return "<http://localhost:8080/" + href + ">;rel=\"" + rel + "\";type=\"" + type + "\"";
+    }
 
     public String toString() {
         return "Link {href=" + href + "; rel=\"" + rel + "\"; type=\"" + type + "\"}";
-    }
-
-    public static void main(String[] args) {
-        Link test = new Link("test/test", "args", "application/json");
-        System.out.println(test);
     }
 }
