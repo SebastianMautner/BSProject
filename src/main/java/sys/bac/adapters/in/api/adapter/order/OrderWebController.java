@@ -42,11 +42,11 @@ public class OrderWebController {
     @GET
     @Path("{orderId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getOrderById(@PathParam("orderId") long id) { // Positive via Service Adapter
+    public Response getOrderById(@PathParam("orderId") long id) { 
         OrderDTO order = oSA.getOrderById(id);
         return Response.ok(order)
                 .header("Link", Link.orders.getHeaderLink())
-                // analog zu Customer: update/delete Links auf dieselbe Ressource
+
                 .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
                 .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
                 .build();
@@ -68,7 +68,7 @@ public class OrderWebController {
                 "application/json"
         )));
 
-        // analog zu Customer: verlinke weitere Collections (falls in Link vorhanden)
+
         return Response.ok(orders)
                 .header("Link", Link.customers.getHeaderLink())
                 .header("Link", Link.devices.getHeaderLink())
@@ -80,7 +80,7 @@ public class OrderWebController {
     public Response postOrder(@Valid OrderDTO order) {
         OrderDTO result = oSA.createOrder(order);
 
-        // analog zu Customer: CREATED + Link Header(s)
+
         return Response.status(Response.Status.CREATED)
                 .header("Link", Link.orders.getHeaderLink())
                 .header("Link", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
