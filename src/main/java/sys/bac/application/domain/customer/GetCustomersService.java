@@ -7,13 +7,15 @@ import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.application.port.in.GetCustomersUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class GetCustomersService implements GetCustomersUseCase{ // might unify the Services in to one class
-    
-    private final CustomerRepository customerRepo;
 
-    private final Mapper mapper;
+    @Inject
+    private CustomerRepository customerRepo;
+
+    private Mapper mapper = new Mapper();
 
     public GetCustomersService(CustomerRepository customerRepo) {
         this.customerRepo = customerRepo;

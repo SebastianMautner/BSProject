@@ -6,18 +6,15 @@ import sys.bac.application.domain.models.LongId;
 import sys.bac.application.port.in.PutCustomerUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class PutCustomerService implements PutCustomerUseCase{
 
-    private final Mapper mapper;
+    private Mapper mapper = new Mapper();
 
-    private final CustomerRepository customerRepo;
-
-    public PutCustomerService(CustomerRepository customerRepo) {
-        this.customerRepo = customerRepo;
-        this.mapper = new Mapper();
-    }
+    @Inject
+    private CustomerRepository customerRepo;
 
     public void updateCustomer(long id, CustomerDTO customer) {
         customerRepo.update(new LongId(id), mapper.toCustomer(customer)); // check ids

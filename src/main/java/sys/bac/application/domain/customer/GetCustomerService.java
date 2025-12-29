@@ -15,7 +15,7 @@ import sys.bac.application.port.out.CustomerRepository;
 @ApplicationScoped
 public class GetCustomerService implements GetCustomerByIdUseCase{ // might unify the Services in to one class
     
-    private final Mapper mapper;
+    private Mapper mapper = new Mapper();
 
     @Inject
     private CustomerRepository customerRepo;

@@ -5,17 +5,15 @@ import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.application.port.in.PostCustomerUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class PostCustomerService implements PostCustomerUseCase{
 
-    private final Mapper mapper;
-    private final CustomerRepository customerRepo;
+    private Mapper mapper = new Mapper();
 
-    public PostCustomerService(CustomerRepository customerRepo) {
-        this.customerRepo = customerRepo;
-        this.mapper = new Mapper();
-    }
+    @Inject
+    private CustomerRepository customerRepo;
 
     public void createCustomer(CustomerDTO customer) {
         customerRepo.create(mapper.toCustomer(customer));
