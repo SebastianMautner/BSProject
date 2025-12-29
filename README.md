@@ -29,7 +29,6 @@ TODO:
 Order: everything
 Devices: everything
 Customer: some more mult options
-Dispatcher Service
 Pagination
 Exceptions (done via Service adapters)
 Docker?

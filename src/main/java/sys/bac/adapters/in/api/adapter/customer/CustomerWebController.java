@@ -87,7 +87,6 @@ public class CustomerWebController {
             return Response.ok(result.getMessage() + "\nTHIS IS NOT 200 OK!").build();
         }
         return Response.status(Response.Status.CREATED).header("Location", uriInfo.getRequestUriBuilder().path(Long.toString(result.getId())).build()).build();
-        //return Response.status(Response.Status.CREATED).header("Location:" uriInfo.getAbsolutePath().path(Long.toString(0))).build(); 
     }
 
     @PUT
@@ -99,10 +98,7 @@ public class CustomerWebController {
 
     @DELETE
     @Path("{id}")
-    public void deleteCustomer(@DefaultValue("-1")@PathParam("id") long id) {
-        if (id == -1) {
-            throw new IllegalArgumentException("400 No Id Specified"); // not final
-        }
+    public void deleteCustomer(@PathParam("id") long id) {
         dCUC.deleteCustomer(id);
     }
 }

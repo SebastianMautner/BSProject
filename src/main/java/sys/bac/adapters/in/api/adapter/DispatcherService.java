@@ -16,8 +16,10 @@ public class DispatcherService {
     @GET
     public Response getPaths() {
         final Response.ResponseBuilder builder = Response.ok();
-        Link link = new Link("customers", "getAllCustomers", "application/json");
-        Response response = builder.header("Link", link.getHeaderLink()).build();
+        Link customers = new Link("customers", "getAllCustomers", "application/json");
+        Link orders = new Link("orders", "getAllOrders", "applicaiton/json");
+        Link devices = new Link("devices", "getAllDevices", "application/json");
+        Response response = builder.header("Link", customers.getHeaderLink()).header("Link", orders.getHeaderLink()).header("Link", devices.getHeaderLink()).build();
         return response;
     }
 }
