@@ -12,7 +12,7 @@ public class GetCustomersService implements GetCustomersUseCase{ // might unify 
     @Inject
     private CustomerRepository customerRepo;
 
-    public CustomersResult findCustomers() {
-        return customerRepo.getAllCustomers();
+    public CustomersResult findCustomers(String query) {
+        return customerRepo.getAllCustomers(query);
     }
 }   

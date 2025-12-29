@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -28,22 +27,20 @@ public class CustomerJpaAdapter implements CustomerRepository{
     private EntityManager eM;
 
     @Transactional
-    public NoContentResult create(Customer customer) {
-        long id = -1;
-        NoContentResult result = new NoContentResult();
+    public CustomerResult create(Customer customer) {
+        CustomerResult result = new CustomerResult();
         try {
             CustomerJPAEntity c = mapper.toJPA(customer);
             eM.persist(c);
-            id = c.getId();
+            result.setResult(mapper.toCustomer(c));
         }
         catch(Exception e) {
             result.setError(500, e.getMessage());
         }
-        result.setId(id);
         return result;
     }
 
-    public CustomersResult getAllCustomers() {
+    public CustomersResult getAllCustomers(String query) {
         List<Customer> list = new ArrayList<>();
         CustomersResult result =  new CustomersResult();
         try {
@@ -71,24 +68,22 @@ public class CustomerJpaAdapter implements CustomerRepository{
         return result;
     }
 
+    @Transactional
     public NoContentResult delete(LongId id) {
         NoContentResult result = new NoContentResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
             eM.remove(eM.find(CustomerJPAEntity.class, id.getId()));
-            eT.commit();
         }
         catch(Exception e) {
-            result.setError(500, "Internal Server Error");
+            result.setError(500, e.getMessage());
         }
         return result;
     }
 
-    public void update(LongId id, Customer customer) {
+    @Transactional
+    public CustomerResult update(LongId id, Customer customer) {
+        CustomerResult result = new CustomerResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
             CustomerJPAEntity c = eM.find(CustomerJPAEntity.class, id.getId());
             eM.detach(c);
             c.setSurname(customer.getSurname());
@@ -96,10 +91,11 @@ public class CustomerJpaAdapter implements CustomerRepository{
             c.setEMail(customer.getEMail());
             c.setPhone(customer.getPhone());
             eM.merge(c);
-            eT.commit();
+            result.setResult(mapper.toCustomer(c));
         }
         catch(Exception e) {
-            throw new RuntimeException("FUCK"); //WIP
+            result.setError(500, e.getMessage());
         }
+        return result;
     }
 }

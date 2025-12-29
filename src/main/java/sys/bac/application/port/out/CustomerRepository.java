@@ -8,13 +8,13 @@ import sys.bac.application.domain.results.NoContentResult;
 
 public interface CustomerRepository {
 
-    CustomersResult getAllCustomers(); //Query idk
+    CustomersResult getAllCustomers(String query); //Query idk
 
-    NoContentResult create(Customer customer);
+    CustomerResult create(Customer customer);
 
     CustomerResult getCustomerById(LongId id);
 
     NoContentResult delete(LongId id);
 
-    void update(LongId id, Customer customer); //maybe not void, idk
+    CustomerResult update(LongId id, Customer customer);
 }
