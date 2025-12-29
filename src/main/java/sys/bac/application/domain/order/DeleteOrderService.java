@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import sys.bac.application.domain.models.LongId;
+import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.port.in.DeleteOrderUseCase;
 import sys.bac.application.port.out.OrderRepository;
 
@@ -13,7 +14,9 @@ public class DeleteOrderService implements DeleteOrderUseCase {
     @Inject
     private OrderRepository orderRepo;
 
-    public void deleteOrder(long id) {
-        orderRepo.delete(new LongId(id));
+    @Override
+    public NoContentResult deleteOrder(long id) {
+        return orderRepo.delete(new LongId(id));
     }
 }
+

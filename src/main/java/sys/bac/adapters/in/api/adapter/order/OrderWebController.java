@@ -1,18 +1,21 @@
 package sys.bac.adapters.in.api.adapter.order;
 
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
 
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.QueryParam;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.core.Context;
@@ -23,51 +26,39 @@ import jakarta.inject.Inject;
 import java.util.List;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
-import sys.bac.adapters.in.api.models.Link;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.PostOrderUseCase;
-import sys.bac.application.port.in.GetOrdersUseCase;
-import sys.bac.application.port.in.GetOrderByIdUseCase;
-import sys.bac.application.port.in.PutOrderUseCase;
-import sys.bac.application.port.in.DeleteOrderUseCase;
+import sys.bac.adapters.in.api.models.Link;
+
 
 @Path("orders")
 public class OrderWebController {
 
     @Inject
-    private GetOrderByIdUseCase gOBIUC;
-
-    @Inject
-    private GetOrdersUseCase gOUC;
-
-    @Inject
-    private PostOrderUseCase poOUC;
-
-    @Inject
-    private PutOrderUseCase puOUC;
-
-    @Inject
-    private DeleteOrderUseCase dOUC;
+    private OrderServiceAdapter oSA;
 
     @Context
     UriInfo uriInfo;
 
-    private Mapper mapper = new Mapper();
-
     @GET
-    @Path("{oId}")
+    @Path("{orderId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getOrderById(@PathParam("oId") long oId) {
-        OrderDTO order = mapper.toDTO(gOBIUC.loadOrderById(oId).getResult());
+    public Response getOrderById(@PathParam("orderId") long id) { // Positive via Service Adapter
+        OrderDTO order = oSA.getOrderById(id);
         return Response.ok(order)
-                .header("Link", new Link("orders", "getAllOrders", "application/json").getHeaderLink())
+                .header("Link", Link.orders.getHeaderLink())
+                // analog zu Customer: update/delete Links auf dieselbe Ressource
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
                 .build();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllOrders() {
-        List<OrderDTO> orders = gOUC.findOrders();
+    public Response getOrders(@DefaultValue("") @QueryParam("q") String query,
+                              @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
+                              @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
+        List<OrderDTO> orders = oSA.getOrders(query);
+
         orders.stream().forEach(o -> o.setSelf(new Link(
                 uriInfo.getBaseUriBuilder()
                         .path(OrderWebController.class)
@@ -76,33 +67,52 @@ public class OrderWebController {
                 "getOrderWithId" + o.getId(),
                 "application/json"
         )));
-        return Response.ok(orders).build();
+
+        // analog zu Customer: verlinke weitere Collections (falls in Link vorhanden)
+        return Response.ok(orders)
+                .header("Link", Link.customers.getHeaderLink())
+                .header("Link", Link.devices.getHeaderLink())
+                .build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postOrder(@Valid OrderDTO order) {
-        NoContentResult result = poOUC.createOrder(order);
-        if (result.hasError()) {
-            return Response.ok(result.getMessage() + "\nTHIS IS NOT 200 OK!").build();
-        }
+        OrderDTO result = oSA.createOrder(order);
+
+        // analog zu Customer: CREATED + Link Header(s)
         return Response.status(Response.Status.CREATED)
-                .header("Location", uriInfo.getRequestUriBuilder()
-                        .path(Long.toString(result.getId()))
-                        .build())
+                .header("Link", Link.orders.getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
                 .build();
     }
 
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateOrder(@Positive @PathParam("id") long id, OrderDTO order) {
-        puOUC.updateOrder(id, order);
+    public Response updateOrder(@Positive @PathParam("id") long id, OrderDTO order) {
+        OrderDTO result = oSA.updateOrder(id, order);
+        addSelfLink(order, "getOrder");
+        return Response.ok(result).build();
     }
 
     @DELETE
-    @Path("{id}")
-    public void deleteOrder(@PathParam("id") long id) {
-        dOUC.deleteOrder(id);
-    }
+        @Path("{id}")
+        public Response deleteOrder(@PathParam("id") long id) {
+        NoContentResult result = oSA.deleteOrder(id);
+
+        if (result.hasError()) {
+                return Response.status(result.getErrorCode())
+                        .entity(result.getMessage())
+                        .build();
+        }
+
+        return Response.noContent()
+                .header("Link", Link.orders.getHeaderLink())
+                .build();
+        }
+
+        private void addSelfLink(OrderDTO order, String rel) {
+                order.setSelf(new Link(Link.orders.getHref() + "/" + order.getId(),rel,"application/json"));
+        }
 }

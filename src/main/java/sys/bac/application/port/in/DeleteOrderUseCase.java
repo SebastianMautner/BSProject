@@ -1,6 +1,9 @@
 package sys.bac.application.port.in;
 
+import sys.bac.application.domain.results.NoContentResult;
+
 public interface DeleteOrderUseCase {
-    void deleteOrder(long id);
+    NoContentResult deleteOrder(long id);
 }
+
 
