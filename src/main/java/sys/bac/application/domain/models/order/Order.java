@@ -1,44 +1,91 @@
 package sys.bac.application.domain.models.order;
 
+import java.time.LocalDate;
+
 import sys.bac.application.domain.models.LongId;
 
 public class Order {
 
-    private LongId orderId;
+    private LongId id;
+    private long customerId;
+    private String serialNumber;
+    private String issueNotes;
 
-    private String note;
+    private LocalDate receivedAt;
+    private LocalDate completion;
+
+    private float costEstimation;
+    private float finalCost;
+
+    private OrderStatus status;
 
     public Order() {
-        this.orderId = new LongId();
+        this.id = new LongId();
+        this.status = OrderStatus.RECEIVED;
+        this.receivedAt = LocalDate.now();
     }
 
-    public Order(LongId id, String note) {
-        this.orderId = id;
-        this.note = note;
+    public Order(LongId id,
+                 long customerId,
+                 String serialNumber,
+                 String issueNotes,
+                 LocalDate receivedAt,
+                 LocalDate completion,
+                 float costEstimation,
+                 float finalCost,
+                 OrderStatus status) {
+        this.id = id;
+        this.customerId = customerId;
+        this.serialNumber = serialNumber;
+        this.issueNotes = issueNotes;
+        this.receivedAt = receivedAt;
+        this.completion = completion;
+        this.costEstimation = costEstimation;
+        this.finalCost = finalCost;
+        this.status = status;
     }
 
-    public Order(long id, String note) {
-        this.orderId = new LongId(id);
-        this.note = note;
-    }
-
-    public long getOrderId() {
-        return orderId.getId();
+    public long getId() {
+        return id.getId();
     }
 
     public LongId getLongId() {
-        return orderId;
+        return id;
     }
 
-    public void setOId(long orderId) {
-        this.orderId = new LongId(orderId);
+    public long getCustomerId() {
+        return customerId;
     }
 
-    public String getNote() {
-        return note;
+    public String getSerialNumber() {
+        return serialNumber;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public String getIssueNotes() {
+        return issueNotes;
+    }
+
+    public LocalDate getReceivedAt() {
+        return receivedAt;
+    }
+
+    public LocalDate getCompletion() {
+        return completion;
+    }
+
+    public float getCostEstimation() {
+        return costEstimation;
+    }
+
+    public float getFinalCost() {
+        return finalCost;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 }

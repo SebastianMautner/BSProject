@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -22,26 +21,12 @@ import sys.bac.application.port.out.OrderRepository;
 @ApplicationScoped
 public class OrderJpaAdapter implements OrderRepository {
 
-    private Mapper mapper = new Mapper();
+    private final Mapper mapper = new Mapper();
 
     @Inject
     private EntityManager eM;
 
-    @Transactional
-    public NoContentResult create(Order order) {
-        long id = -1;
-        NoContentResult result = new NoContentResult();
-        try {
-            OrderJPAEntity o = mapper.toJPA(order);
-            eM.persist(o);
-            id = o.getId();
-        } catch (Exception e) {
-            result.setError(500, e.getMessage());
-        }
-        result.setId(id);
-        return result;
-    }
-
+    @Override
     public List<Order> getAllOrders() {
         List<Order> list = new ArrayList<>();
         try {
@@ -49,51 +34,80 @@ public class OrderJpaAdapter implements OrderRepository {
             CriteriaQuery<OrderJPAEntity> cQ = cB.createQuery(OrderJPAEntity.class);
             Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
             cQ.select(root);
+
             list = eM.createQuery(cQ)
                     .getResultList()
                     .stream()
                     .map(mapper::toOrder)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException("WIP"); // analog zu deinem Customer-Code (dort steht aktuell auch WIP)
+            throw new RuntimeException("WIP", e);
         }
         return list;
     }
 
+    @Override
     public OrderResult getOrderById(LongId id) {
         OrderResult result = new OrderResult();
         try {
-            result = mapper.toOrderResult(eM.find(OrderJPAEntity.class, id.getId()));
+            OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
+            if (entity == null) {
+                result.setError(404, "Order not found");
+                return result;
+            }
+            result = new OrderResult(mapper.toOrder(entity));
         } catch (Exception e) {
             result.setError(500, e.getMessage());
         }
         return result;
     }
 
-    public NoContentResult delete(LongId id) {
+    @Transactional
+    @Override
+    public NoContentResult create(Order order) {
         NoContentResult result = new NoContentResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
-            eM.remove(eM.find(OrderJPAEntity.class, id.getId()));
-            eT.commit();
+            OrderJPAEntity entity = mapper.toJPA(order);
+            eM.persist(entity);
+            result.setId(entity.getId());
         } catch (Exception e) {
-            result.setError(500, "Internal Server Error");
+            result.setError(500, e.getMessage());
         }
         return result;
     }
 
-    public void update(LongId id, Order order) {
+    @Transactional
+    @Override
+    public NoContentResult delete(LongId id) {
+        NoContentResult result = new NoContentResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
-            OrderJPAEntity o = eM.find(OrderJPAEntity.class, id.getId());
-            eM.detach(o);
-            o.setNote(order.getNote());
-            eM.merge(o);
-            eT.commit();
+            OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
+            if (entity == null) {
+                result.setError(404, "Order not found");
+                return result;
+            }
+            eM.remove(entity);
         } catch (Exception e) {
-            throw new RuntimeException("WIP");
+            result.setError(500, e.getMessage());
         }
+        return result;
+    }
+
+    @Transactional
+    @Override
+    public void update(LongId id, Order order) {
+        OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
+        if (entity == null) {
+            throw new IllegalArgumentException("Order not found: " + id.getId());
+        }
+
+        entity.setCustomerId(order.getCustomerId());
+        entity.setSerialNumber(order.getSerialNumber());
+        entity.setIssueNotes(order.getIssueNotes());
+        entity.setReceivedAt(order.getReceivedAt());
+        entity.setCompletion(order.getCompletion());
+        entity.setCostEstimation(order.getCostEstimation());
+        entity.setFinalCost(order.getFinalCost());
+        entity.setStatus(order.getStatus());
     }
 }

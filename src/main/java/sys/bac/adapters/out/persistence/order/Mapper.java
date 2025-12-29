@@ -1,22 +1,34 @@
 package sys.bac.adapters.out.persistence.order;
 
-import sys.bac.application.domain.models.order.Order;
 import sys.bac.application.domain.models.LongId;
-import sys.bac.application.domain.results.OrderResult;
+import sys.bac.application.domain.models.order.Order;
 
 public class Mapper {
 
     public OrderJPAEntity toJPA(Order order) {
-        // ID wird von JPA generiert – wir übernehmen hier nur die Daten
-        return new OrderJPAEntity(order.getNote());
+        OrderJPAEntity e = new OrderJPAEntity();
+        e.setCustomerId(order.getCustomerId());
+        e.setSerialNumber(order.getSerialNumber());
+        e.setIssueNotes(order.getIssueNotes());
+        e.setReceivedAt(order.getReceivedAt());
+        e.setCompletion(order.getCompletion());
+        e.setCostEstimation(order.getCostEstimation());
+        e.setFinalCost(order.getFinalCost());
+        e.setStatus(order.getStatus());
+        return e;
     }
 
-    public Order toOrder(OrderJPAEntity entity) {
-        if (entity == null) return null;
-        return new Order(new LongId(entity.getId()), entity.getNote());
-    }
-
-    public OrderResult toOrderResult(OrderJPAEntity entity) {
-        return new OrderResult(toOrder(entity));
+    public Order toOrder(OrderJPAEntity e) {
+        return new Order(
+                new LongId(e.getId()),
+                e.getCustomerId(),
+                e.getSerialNumber(),
+                e.getIssueNotes(),
+                e.getReceivedAt(),
+                e.getCompletion(),
+                e.getCostEstimation(),
+                e.getFinalCost(),
+                e.getStatus()
+        );
     }
 }

@@ -1,38 +1,106 @@
 package sys.bac.adapters.out.persistence.order;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 
+import sys.bac.application.domain.models.order.OrderStatus;
+
 @Entity
-@Table(name = "OrderTable")
+@Table(name = "repair_orders")
 public class OrderJPAEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long orderId;
+    private long id;
 
     @Column(nullable = false)
-    private String note;
+    private long customerId;
 
-    public OrderJPAEntity() {
-    }
+    @Column(nullable = false)
+    private String serialNumber;
 
-    public OrderJPAEntity(String note) {
-        this.note = note;
-    }
+    @Column(length = 2000)
+    private String issueNotes;
+
+    private LocalDate receivedAt;
+    private LocalDate completion;
+
+    private float costEstimation;
+    private float finalCost;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    public OrderJPAEntity() {}
+
+    // Getter / Setter
 
     public long getId() {
-        return orderId;
+        return id;
     }
 
-    public void setId(long id) {
-        this.orderId = id;
+    public long getCustomerId() {
+        return customerId;
     }
 
-    public String getNote() {
-        return note;
+    public void setCustomerId(long customerId) {
+        this.customerId = customerId;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public String getIssueNotes() {
+        return issueNotes;
+    }
+
+    public void setIssueNotes(String issueNotes) {
+        this.issueNotes = issueNotes;
+    }
+
+    public LocalDate getReceivedAt() {
+        return receivedAt;
+    }
+
+    public void setReceivedAt(LocalDate receivedAt) {
+        this.receivedAt = receivedAt;
+    }
+
+    public LocalDate getCompletion() {
+        return completion;
+    }
+
+    public void setCompletion(LocalDate completion) {
+        this.completion = completion;
+    }
+
+    public float getCostEstimation() {
+        return costEstimation;
+    }
+
+    public void setCostEstimation(float costEstimation) {
+        this.costEstimation = costEstimation;
+    }
+
+    public float getFinalCost() {
+        return finalCost;
+    }
+
+    public void setFinalCost(float finalCost) {
+        this.finalCost = finalCost;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 }
