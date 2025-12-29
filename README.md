@@ -29,12 +29,11 @@ TODO:
 Order: everything
 Devices: everything
 Customer: some more mult options
+Hypermedia
 Pagination
-Exceptions (done via Service adapters)
 Docker?
-Results + HTTP
 Caching
-probably more
+other use cases
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 

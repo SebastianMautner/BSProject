@@ -7,6 +7,10 @@ public class Link {
     private String rel;
     private String type;
 
+    public static final Link customers = new Link("customers", "getAllCustomers", "application/json");
+    public static final Link orders = new Link("orders", "getAllOrders", "applicaiton/json");
+    public static final Link devices = new Link("devices", "getAllDevices", "application/json");
+
     public Link() {}
 
     public Link(String href, String rel, String type) {

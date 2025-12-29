@@ -15,7 +15,7 @@ public class GetCustomerService implements GetCustomerByIdUseCase{ // might unif
     @Inject
     private CustomerRepository customerRepo;
 
-    public CustomerResult loadCustomerById(long cId) {
-        return customerRepo.getCustomerById(new LongId(cId));
+    public CustomerResult loadCustomerById(LongId cId) {
+        return customerRepo.getCustomerById(cId);
     }
 }

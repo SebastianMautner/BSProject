@@ -2,17 +2,18 @@ package sys.bac.adapters.in.api.adapter.customer;
 
 
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.GET;
 
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-
+import jakarta.ws.rs.QueryParam;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 
 import jakarta.ws.rs.core.Response;
@@ -26,79 +27,63 @@ import java.util.List;
 
 import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.adapters.in.api.models.Link;
-import sys.bac.application.port.in.PostCustomerUseCase;
-import sys.bac.application.port.in.GetCustomersUseCase;
-import sys.bac.application.port.in.GetCustomerByIdUseCase;
-import sys.bac.application.port.in.PutCustomerUseCase;
-import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.DeleteCustomerUseCase;
-
 
 @Path("customers")
 public class CustomerWebController {
-    
-    @Inject
-    private GetCustomerByIdUseCase gCBIUC;
 
     @Inject
-    private GetCustomersUseCase gCUC;
-
-    @Inject
-    private PostCustomerUseCase poCUC;
-
-    @Inject
-    private PutCustomerUseCase puCUC;
-
-    @Inject
-    private DeleteCustomerUseCase dCUC;
+    private  CustomerServiceAdapter cSA;
 
     @Context
     UriInfo uriInfo;
-
-    private Mapper mapper = new Mapper();
     
     @GET
-    @Path("{cId}")
-    @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
-    public Response getCustomerById(@PathParam("customerId")long cId) { //Positive via Service Adapters
-        CustomerDTO customer;
-        customer = mapper.toDTO(gCBIUC.loadCustomerById(cId).getResult());
-        return Response.ok(customer).header("Link", new Link("customers", "getAllCustomers", "application/json").getHeaderLink()).build();
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCustomerById(@PathParam("customerId")long id) { //Positive via Service Adapters
+        CustomerDTO customer = cSA.getCustomerById(id);
+        return Response.ok(customer).header("Link", Link.customers.getHeaderLink())
+                                    .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink())
+                                    .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink()).build();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
-    public Response getAllCustomers() { // pagination
-        List<CustomerDTO> customers;
-            customers = gCUC.findCustomers();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCustomers(@DefaultValue("") @QueryParam("q") String query,
+                                 @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
+                                 @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
+        List<CustomerDTO> customers = cSA.getCustomers(query);
         customers.stream().forEach(c -> c.setSelf(new Link(uriInfo.getBaseUriBuilder()
                                                                   .path(CustomerWebController.class)
                                                                   .path(CustomerWebController.class, "getCustomerById")
                                                                   .build(c.getId()).toASCIIString(), "getCustomerWithId" + c.getId(), "application/json")));
-        return Response.ok(customers).build();
+        return Response.ok(customers).header("Link", Link.devices.getHeaderLink()).header("Link", Link.orders.getHeaderLink()).build();
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON) //XML
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response postCustomer(@Valid CustomerDTO customer) {
-        
-        NoContentResult result = poCUC.createCustomer(customer);
-        if(result.hasError()) {
-            return Response.ok(result.getMessage() + "\nTHIS IS NOT 200 OK!").build();
-        }
-        return Response.status(Response.Status.CREATED).header("Location", uriInfo.getRequestUriBuilder().path(Long.toString(result.getId())).build()).build();
+        CustomerDTO result = cSA.createCustomer(customer);
+        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers + "/" + result.getId(), "getPerson", "application/json").getHeaderLink()).build();
     }
 
     @PUT
     @Path("{id}")
-    @Consumes(MediaType.APPLICATION_JSON) //XML
-    public void updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
-        puCUC.updateCustomer(id, customer);
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
+        CustomerDTO result = cSA.updateCustomer(id, customer);
+        addSelfLink(customer, "getCustomer");
+        return Response.ok(result).build();
     }
 
     @DELETE
     @Path("{id}")
-    public void deleteCustomer(@PathParam("id") long id) {
-        dCUC.deleteCustomer(id);
+    public Response deleteCustomer(@PathParam("id") long id) {
+        cSA.deleteCustomer(id);
+        return Response.noContent().header("Link", Link.customers.getHeaderLink()).build();
+    }
+
+    private void addSelfLink(CustomerDTO customer, String rel) {
+        customer.setSelf(new Link(Link.customers.getHref() + "/" + customer.getId(), rel, "application/json"));
     }
 }

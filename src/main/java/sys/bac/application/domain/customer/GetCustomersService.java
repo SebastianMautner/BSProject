@@ -1,9 +1,6 @@
 package sys.bac.application.domain.customer;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import sys.bac.adapters.in.api.adapter.customer.Mapper;
-import sys.bac.adapters.in.api.models.CustomerDTO;
+import sys.bac.application.domain.results.CustomersResult;
 import sys.bac.application.port.in.GetCustomersUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,14 +12,7 @@ public class GetCustomersService implements GetCustomersUseCase{ // might unify 
     @Inject
     private CustomerRepository customerRepo;
 
-    private Mapper mapper = new Mapper();
-
-    public GetCustomersService(CustomerRepository customerRepo) {
-        this.customerRepo = customerRepo;
-        mapper = new Mapper();
-    }
-
-    public List<CustomerDTO> findCustomers() {
-        return customerRepo.getAllCustomers().stream().map(mapper::toDTO).collect(Collectors.toList());
+    public CustomersResult findCustomers(String query) {
+        return customerRepo.getAllCustomers(query);
     }
 }   

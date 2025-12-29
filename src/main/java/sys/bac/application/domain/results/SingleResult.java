@@ -14,6 +14,10 @@ public class SingleResult<T> extends AbstractResult {
         return result;
     }
 
+    public void setResult(T result) {
+        this.result = result;
+    }
+
     public boolean isEmpty() {
         return result == null;
     }
