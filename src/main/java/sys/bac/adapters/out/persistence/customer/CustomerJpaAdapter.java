@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
 import sys.bac.application.domain.results.CustomerResult;
+import sys.bac.application.domain.results.CustomersResult;
 import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.port.out.CustomerRepository;
 
@@ -42,19 +43,21 @@ public class CustomerJpaAdapter implements CustomerRepository{
         return result;
     }
 
-    public List<Customer> getAllCustomers() {
+    public CustomersResult getAllCustomers() {
         List<Customer> list = new ArrayList<>();
+        CustomersResult result =  new CustomersResult();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
             cQ.select(root);
-            list = eM.createQuery(cQ).getResultList().stream().map(result -> mapper.toCustomer(result)).collect(Collectors.toList());
+            list = eM.createQuery(cQ).getResultList().stream().map(customer -> mapper.toCustomer(customer)).collect(Collectors.toList());
         }
         catch ( Exception e) {
-            throw new RuntimeException("FUCK"); //WIP
+            result.setError(500, e.getMessage());
         }
-        return list;
+        result.setResult(list);
+        return result;
     }
 
     public CustomerResult getCustomerById(LongId id) {

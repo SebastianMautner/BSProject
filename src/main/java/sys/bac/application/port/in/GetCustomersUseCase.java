@@ -1,9 +1,7 @@
 package sys.bac.application.port.in;
 
-import java.util.List;
-
-import sys.bac.adapters.in.api.models.CustomerDTO;
+import sys.bac.application.domain.results.CustomersResult;
 
 public interface GetCustomersUseCase {
-    List<CustomerDTO> findCustomers();
+    CustomersResult findCustomers();
 }

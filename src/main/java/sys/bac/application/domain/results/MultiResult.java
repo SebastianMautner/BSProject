@@ -14,4 +14,12 @@ public class MultiResult<T> extends AbstractResult {
     public boolean isEmpty() {
         return result.isEmpty();
     }
+
+    public void setResult(List<T> result) {
+        this.result = result;
+    }
+
+    public List<T> getResult() {
+        return result;
+    }
 }

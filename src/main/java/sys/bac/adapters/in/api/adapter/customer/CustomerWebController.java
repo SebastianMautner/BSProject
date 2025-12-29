@@ -7,7 +7,6 @@ import jakarta.ws.rs.GET;
 
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 
@@ -36,12 +35,6 @@ import sys.bac.application.port.in.DeleteCustomerUseCase;
 
 @Path("customers")
 public class CustomerWebController {
-    
-    @Inject
-    private GetCustomerByIdUseCase gCBIUC;
-
-    @Inject
-    private GetCustomersUseCase gCUC;
 
     @Inject
     private PostCustomerUseCase poCUC;
@@ -52,25 +45,24 @@ public class CustomerWebController {
     @Inject
     private DeleteCustomerUseCase dCUC;
 
+    @Inject
+    private  CustomerServiceAdapter cSA;
+
     @Context
     UriInfo uriInfo;
-
-    private Mapper mapper = new Mapper();
     
     @GET
     @Path("{cId}")
-    @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomerById(@PathParam("customerId")long cId) { //Positive via Service Adapters
-        CustomerDTO customer;
-        customer = mapper.toDTO(gCBIUC.loadCustomerById(cId).getResult());
+        CustomerDTO customer = cSA.getCustomerById(cId);
         return Response.ok(customer).header("Link", new Link("customers", "getAllCustomers", "application/json").getHeaderLink()).build();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCustomers() { // pagination
-        List<CustomerDTO> customers;
-            customers = gCUC.findCustomers();
+        List<CustomerDTO> customers = cSA.getAllCustomers();
         customers.stream().forEach(c -> c.setSelf(new Link(uriInfo.getBaseUriBuilder()
                                                                   .path(CustomerWebController.class)
                                                                   .path(CustomerWebController.class, "getCustomerById")
@@ -79,7 +71,7 @@ public class CustomerWebController {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON) //XML
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response postCustomer(@Valid CustomerDTO customer) {
         
         NoContentResult result = poCUC.createCustomer(customer);
@@ -91,7 +83,7 @@ public class CustomerWebController {
 
     @PUT
     @Path("{id}")
-    @Consumes(MediaType.APPLICATION_JSON) //XML
+    @Consumes(MediaType.APPLICATION_JSON)
     public void updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
         puCUC.updateCustomer(id, customer);
     }
