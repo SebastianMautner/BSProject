@@ -54,14 +54,16 @@ public class CustomerWebController {
 
     @Context
     UriInfo uriInfo;
+
+    private Mapper mapper = new Mapper();
     
     @GET
     @Path("{cId}")
     @Produces(MediaType.APPLICATION_JSON) //maybe XML as well later
-    public CustomerResult getCustomerById(@Positive @PathParam("customerId")long cId) {
+    public Response getCustomerById(@PathParam("customerId")long cId) { //Positive via Service Adapters
         CustomerDTO customer;
-        customer = gCBIUC.loadCustomerById(cId);
-        return new CustomerResult(customer);
+        customer = mapper.toDTO(gCBIUC.loadCustomerById(cId).getResult());
+        return Response.ok(customer).header("Link", new Link("customers", "getAllCustomers", "application/json").getHeaderLink()).build();
     }
 
     @GET
@@ -71,6 +73,7 @@ public class CustomerWebController {
             customers = gCUC.findCustomers();
         customers.stream().forEach(c -> c.setSelf(new Link(uriInfo.getBaseUriBuilder()
                                                                   .path(CustomerWebController.class)
+                                                                  .path(CustomerWebController.class, "getCustomerById")
                                                                   .build(c.getId()).toASCIIString(), "getCustomerWithId" + c.getId(), "application/json")));
         return Response.ok(customers).build();
     }

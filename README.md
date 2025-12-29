@@ -31,7 +31,7 @@ Devices: everything
 Customer: some more mult options
 Dispatcher Service
 Pagination
-Exceptions
+Exceptions (done via Service adapters)
 Docker?
 Results + HTTP
 Caching

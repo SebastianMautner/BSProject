@@ -2,7 +2,6 @@ package sys.bac.adapters.out.persistence.customer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,6 +14,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
+import sys.bac.application.domain.results.CustomerResult;
 import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.port.out.CustomerRepository;
 
@@ -57,16 +57,13 @@ public class CustomerJpaAdapter implements CustomerRepository{
         return list;
     }
 
-    public Optional<Customer> getCustomerById(LongId id) {
-        Optional<Customer> result;
+    public CustomerResult getCustomerById(LongId id) {
+        CustomerResult result = new CustomerResult();
         try {
-            EntityTransaction eT = eM.getTransaction();
-            eT.begin();
-            result = Optional.of(mapper.toCustomer(eM.find(CustomerJPAEntity.class, id.getId())));
-            eT.commit();
+            result = mapper.toCustomerResult(eM.find(CustomerJPAEntity.class, id.getId()));
         }
-        catch ( Exception e) {
-            throw new RuntimeException("FUCK"); //WIP
+        catch (Exception e) {
+            result.setError(500, e.getMessage());
         }
         return result;
     }

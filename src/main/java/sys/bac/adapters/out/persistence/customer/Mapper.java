@@ -1,6 +1,7 @@
 package sys.bac.adapters.out.persistence.customer;
 
 import sys.bac.application.domain.models.customer.Customer;
+import sys.bac.application.domain.results.CustomerResult;
 
 public class Mapper {
 
@@ -15,5 +16,13 @@ public class Mapper {
 
     public Customer toCustomer(CustomerJPAEntity c) {
         return new Customer(c.getId(), c.getSurname(), c.getFirstname(), c.getEMail(), c.getPhone());
+    }
+
+    public CustomerResult toCustomerResult(Customer c) {
+        return new CustomerResult(c);
+    }
+
+    public CustomerResult toCustomerResult(CustomerJPAEntity c) {
+        return toCustomerResult(toCustomer(c));
     }
 }
