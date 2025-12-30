@@ -108,7 +108,7 @@ public class DeviceWebController {
     }
     
     private DeviceDTO addSelfLink(DeviceDTO dto, String rel) {
-        dto.setSelf(new Link("http://localhost:8080/" + Link.devices.getHref() + "/" + dto.getId(), rel, "application/json"));
+        dto.setSelf(new Link( "http://localhost:8080/" + Link.devices.getHref() + "/" + dto.getId(), rel, "application/json"));
         return dto;
     }
 }

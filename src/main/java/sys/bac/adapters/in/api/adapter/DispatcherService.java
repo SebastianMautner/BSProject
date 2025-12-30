@@ -15,11 +15,10 @@ public class DispatcherService {
     
     @GET
     public Response getPaths() {
-        final Response.ResponseBuilder builder = Response.ok();
-        Link customers = new Link("customers", "getAllCustomers", "application/json");
-        Link orders = new Link("orders", "getAllOrders", "applicaiton/json");
-        Link devices = new Link("devices", "getAllDevices", "application/json");
-        Response response = builder.header("Link", customers.getHeaderLink()).header("Link", orders.getHeaderLink()).header("Link", devices.getHeaderLink()).build();
-        return response;
+        return Response.ok()
+        .header("Link", Link.customers.getHeaderLink())
+        .header("Link", Link.orders.getHeaderLink())
+        .header("Link", Link.devices.getHeaderLink())
+        .build();
     }
 }

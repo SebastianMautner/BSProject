@@ -20,7 +20,11 @@ public class Link {
     }
 
     public String getHref() {
-        return  "http://localhost:8080/" + href;
+        return href;
+    }
+
+    private String getHeaderHref() {
+        return "http://localhost:8080/" + href;
     }
 
     public void setHref(String href) {
@@ -44,10 +48,10 @@ public class Link {
     }
     @JsonIgnore
     public String getHeaderLink() {
-        return "<" + getHref() + ">;rel=\"" + getRel() + "\";type=\"" + getType() + "\"";
+        return "<" + getHeaderHref() + ">;rel=\"" + getRel() + "\";type=\"" + getType() + "\"";
     }
 
     public String toString() {
-        return "Link {href=" + getHref() + "; rel=\"" + getRel() + "\"; type=\"" + getType() + "\"}";
+        return "Link {href=" + getHeaderHref() + "; rel=\"" + getRel() + "\"; type=\"" + getType() + "\"}";
     }
 }

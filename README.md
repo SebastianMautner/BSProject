@@ -26,12 +26,10 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-Hypermedia in case of error (e.g. NotFoundException)
-Pagination
+Validation
 Docker?
 Caching
 Querying
-change localhost to actual address
 other use cases
 ReadMe
 Video

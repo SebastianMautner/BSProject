@@ -9,6 +9,7 @@ public class OrderDTO extends AbstractDataTransferObject {
 
     @NotBlank
     private long customerId;
+
     @NotBlank
     private long deviceId;
     @NotBlank
@@ -24,6 +25,7 @@ public class OrderDTO extends AbstractDataTransferObject {
     
     private float finalCost;
 
+    @NotBlank
     private OrderStatus status;
 
     public long getCustomerId() {

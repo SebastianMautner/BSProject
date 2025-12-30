@@ -1,12 +1,25 @@
 package sys.bac.adapters.in.api.models;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class DeviceDTO extends AbstractDataTransferObject {
 
+    @NotBlank
     private long customerId;
+    
+    @NotBlank
     private String serialNumber;
+
+    @NotBlank
     private String type;
+
+    @NotBlank
     private String brand;
+
+    @NotBlank
     private String model;
+
+    @NotBlank
     private String notes;
 
     public long getCustomerId() { return customerId; }
