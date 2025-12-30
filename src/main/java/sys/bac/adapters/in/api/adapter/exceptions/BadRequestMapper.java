@@ -1,6 +1,6 @@
 package sys.bac.adapters.in.api.adapter.exceptions;
 
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -12,27 +12,28 @@ import sys.bac.adapters.in.api.adapter.order.OrderWebController;
 import sys.bac.adapters.in.api.models.Link;
 
 @Provider
-public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
+public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
+    
     @Context
     private ResourceInfo resource;
     
-    public Response toResponse(NotFoundException ex) {
+    public Response toResponse(BadRequestException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(404).header("Link", Link.customers.getHeaderLink()).build();
+            return Response.status(400).header("Link", Link.customers.getHeaderLink()).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(404).header("Link", Link.orders.getHeaderLink()).build();
+            return Response.status(400).header("Link", Link.orders.getHeaderLink()).build();
         }
         // else if (resourceClass == DeviceWebController.class) {
-        //     return Response.status(404).header("Link", Link.devices.getHeaderLink()).build();
+        //     return Response.status(400).header("Link", Link.devices.getHeaderLink()).build();
         // }
         else if (resourceClass == DispatcherService.class) {
-            return Response.status(404)
+            return Response.status(400)
             .header("Link", new Link("http://localhost:8080/", "getDispatcherService", "application/json")).build();
         }
         else {
-            return Response.status(404)
+            return Response.status(400)
             .header("How", "YouFailedHypermedia")
             .header("Link", new Link("http://localhost:8080/", "getDispatcherService", "application/json")).build();
         }

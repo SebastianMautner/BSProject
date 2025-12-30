@@ -2,18 +2,26 @@ package sys.bac.adapters.in.api.models;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotBlank;
 import sys.bac.application.domain.models.order.OrderStatus;
 
 public class OrderDTO extends AbstractDataTransferObject {
 
+    @NotBlank
     private long customerId;
+    @NotBlank
     private String serialNumber;
+    @NotBlank
     private String issueNotes;
 
+    @NotBlank
     private LocalDate receivedAt;
+
     private LocalDate completion;
 
+    @NotBlank
     private float costEstimation;
+    
     private float finalCost;
 
     private OrderStatus status;
