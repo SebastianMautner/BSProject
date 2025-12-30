@@ -50,7 +50,7 @@ public class DeviceWebController {
             .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
             .header("Link", Link.orders.getHeaderLink())
             .header("Link", Link.customers.getHeaderLink())
-            .header("Link", new Link(Link.devices.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink())
             .build();
 
         } else if(devices.next()) {
@@ -58,7 +58,7 @@ public class DeviceWebController {
             .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
             .header("Link", Link.orders.getHeaderLink())
             .header("Link", Link.customers.getHeaderLink())
-            .header("Link", new Link(Link.devices.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink())
             .build();
 
         } else if(devices.prev()) {
@@ -66,14 +66,14 @@ public class DeviceWebController {
             .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink())
             .header("Link", Link.orders.getHeaderLink())
             .header("Link", Link.customers.getHeaderLink())
-            .header("Link", new Link(Link.devices.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink())
             .build();
 
         }else {
             return Response.ok(devices.getResult())
             .header("Link", Link.customers.getHeaderLink())
             .header("Link", Link.orders.getHeaderLink())
-            .header("Link", new Link(Link.devices.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink())
             .build();
         }
     }

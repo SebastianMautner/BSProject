@@ -62,7 +62,7 @@ public class OrderWebController {
                         .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
                         .header("Link", Link.customers.getHeaderLink())
                         .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
                         .build();
                         
                 } else if(orders.next()) {
@@ -70,7 +70,7 @@ public class OrderWebController {
                         .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
                         .header("Link", Link.customers.getHeaderLink())
                         .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
                         .build();
                         
                 } else if(orders.prev()) {
@@ -78,13 +78,13 @@ public class OrderWebController {
                         .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink())
                         .header("Link", Link.customers.getHeaderLink())
                         .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
                         .build();
                         
                 }else {
                         return Response.ok(orders.getResult()).header("Link", Link.devices.getHeaderLink())
                         .header("Link", Link.customers.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
                         .build();
                 }
         }
