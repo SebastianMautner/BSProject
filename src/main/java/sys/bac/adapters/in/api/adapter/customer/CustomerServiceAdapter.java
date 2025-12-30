@@ -36,7 +36,7 @@ public class CustomerServiceAdapter {
     @Inject
     private DeleteCustomerUseCase dCUC;
     
-    private Mapper mapper = new Mapper();
+    private final Mapper mapper = new Mapper();
     
     public CustomerDTO getCustomerById(long id) {
         LongId cId = new LongId(id);
