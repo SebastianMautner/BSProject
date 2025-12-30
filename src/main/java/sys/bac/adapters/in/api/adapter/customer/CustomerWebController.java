@@ -11,6 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 
@@ -19,10 +20,10 @@ import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.CustomerDTO;
+import sys.bac.adapters.in.api.models.CustomersApiResult;
 import sys.bac.adapters.in.api.models.Link;
 
 @Path("customers")
@@ -47,12 +48,43 @@ public class CustomerWebController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomers(@DefaultValue("") @QueryParam("q") String query,
     @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
-    @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
-        List<CustomerDTO> customers = cSA.getCustomers(query);
-        customers = customers.stream().map(c -> addSelfLink(c, "getOrderWithId" + c.getId())).collect(Collectors.toList());
-        return Response.ok(customers).header("Link", Link.devices.getHeaderLink())
-        .header("Link", Link.orders.getHeaderLink())
-        .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink()).build();
+    @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
+        size = Math.min(size, 100);
+        
+        CustomersApiResult customers = cSA.getCustomers(query, offset, size);
+        customers.setResult(customers.getResult().stream().map(c -> addSelfLink(c, "getOrderWithId" + c.getId())).collect(Collectors.toList()));
+        
+        if (customers.next() && customers.prev()) {
+            return Response.ok(customers.getResult())
+            .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
+            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
+            .header("Link", Link.orders.getHeaderLink())
+            .header("Link", Link.devices.getHeaderLink())
+            .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .build();
+
+        } else if(customers.next()) {
+            return Response.ok(customers.getResult())
+            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
+            .header("Link", Link.orders.getHeaderLink())
+            .header("Link", Link.devices.getHeaderLink())
+            .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .build();
+
+        } else if(customers.prev()) {
+            return Response.ok(customers.getResult())
+            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink())
+            .header("Link", Link.orders.getHeaderLink())
+            .header("Link", Link.devices.getHeaderLink())
+            .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .build();
+
+        }else {
+            return Response.ok(customers.getResult()).header("Link", Link.devices.getHeaderLink())
+            .header("Link", Link.orders.getHeaderLink())
+            .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
+            .build();
+        }
     }
     
     @POST
@@ -65,7 +97,7 @@ public class CustomerWebController {
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateCustomer(@PathParam("id") long id, @Valid CustomerDTO customer) {
+    public Response updateCustomer(@Positive @PathParam("id") long id, @Valid CustomerDTO customer) {
         cSA.updateCustomer(id, customer);
         return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink()).build();
     }

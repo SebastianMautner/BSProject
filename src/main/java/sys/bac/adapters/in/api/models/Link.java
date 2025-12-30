@@ -20,7 +20,7 @@ public class Link {
     }
 
     public String getHref() {
-        return href;
+        return  "http://localhost:8080/" + href;
     }
 
     public void setHref(String href) {

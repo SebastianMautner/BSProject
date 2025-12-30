@@ -13,9 +13,10 @@ import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
+import sys.bac.application.domain.results.LongResult;
 import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.domain.results.customer.CustomerResult;
-import sys.bac.application.domain.results.customer.CustomersResult;
+import sys.bac.application.domain.results.customer.JpaCustomersResult;
 import sys.bac.application.port.out.CustomerRepository;
 
 @ApplicationScoped
@@ -40,18 +41,20 @@ public class CustomerJpaAdapter implements CustomerRepository{
         return result;
     }
 
-    public CustomersResult getAllCustomers(String query) {
+    public JpaCustomersResult getAllCustomers(String query, int offset, int size) {
         List<Customer> list = new ArrayList<>();
-        CustomersResult result =  new CustomersResult();
+        JpaCustomersResult result =  new JpaCustomersResult();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
             cQ.select(root);
             list = eM.createQuery(cQ)
+            .setFirstResult(offset)
+            .setMaxResults(size)
             .getResultList()
             .stream()
-            .map(mapper::toCustomer)
+            .map(c -> mapper.toCustomer(c))
             .collect(Collectors.toList());
         }
         catch ( Exception e) {
@@ -99,6 +102,23 @@ public class CustomerJpaAdapter implements CustomerRepository{
         catch(Exception e) {
             result.setError(500, e.getMessage());
         }
+        return result;
+    }
+
+    public LongResult count() {
+        LongResult result = new LongResult();
+        long amount = -1;
+        try {
+            CriteriaBuilder cB = eM.getCriteriaBuilder();
+            CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
+            Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
+            cQ.select(cB.count(root));
+            amount = eM.createQuery(cQ).getSingleResult();
+        }
+        catch ( Exception e) {
+            result.setError(500, e.getMessage());
+        }
+        result.setResult(amount);
         return result;
     }
 }

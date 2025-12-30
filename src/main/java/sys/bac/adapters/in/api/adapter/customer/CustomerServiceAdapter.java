@@ -1,6 +1,5 @@
 package sys.bac.adapters.in.api.adapter.customer;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import sys.bac.adapters.in.api.models.CustomerDTO;
+import sys.bac.adapters.in.api.models.CustomersApiResult;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.domain.results.customer.CustomerResult;
@@ -52,12 +52,16 @@ public class CustomerServiceAdapter {
         }
     }
     
-    public List<CustomerDTO> getCustomers(String query) {
-        CustomersResult customers = gCUC.findCustomers(query);
+    public CustomersApiResult getCustomers(String query, int offset, int size) {
+        CustomersResult customers = gCUC.findCustomers(query, offset, size);
         if(customers.hasError()) {
             throw new InternalServerErrorException(customers.getMessage());
         }
-        return customers.getResult().stream().map(customer -> mapper.toDTO(customer)).collect(Collectors.toList());
+        CustomersApiResult result = new CustomersApiResult(customers.getResult().getResult()
+        .stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList()), customers.getResult().getTotalElements() > offset + size, offset != 0);
+        return result;
     }
     
     public CustomerDTO createCustomer(CustomerDTO customer) {
