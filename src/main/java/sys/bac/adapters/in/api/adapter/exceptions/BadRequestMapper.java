@@ -31,12 +31,12 @@ public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
         }
         else if (resourceClass == DispatcherService.class) {
             return Response.status(400)
-            .header("Link", new Link("", "getDispatcherService", "application/json")).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         else {
             return Response.status(400)
             .header("How", "YouFailedHypermedia")
-            .header("Link", new Link("http://localhost/", "getDispatcherService", "application/json")).build();
+            .header("Link", new Link("http://localhost/", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         
     }
