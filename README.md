@@ -1,4 +1,4 @@
-Package-structure of the Project (WIP)
+Package-structure of the Project
 
 proj (Main folder of the project, including files such as pom.xml)
 ├── src (main folder with the source code)
@@ -26,19 +26,22 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-Order: everything (being worked on)
 Devices: everything (being worked on)
-Customer: some more mult options, GetById has some problems, Delete has many problems
 Hypermedia in case of error (e.g. NotFoundException)
 Pagination
 Docker?
 Caching
+Querying
+change localhost to actual address
 other use cases
 ReadMe
+Video
+Tests
 
 Open Questions:
 What the fuck does he mean with the whole docker bullshit?
-
+Is XML really necessary?
+is using localhost for addresses fine, or does it need to be a seperate thing?
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -24,6 +24,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.inject.Inject;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.adapters.in.api.models.Link;
@@ -40,8 +41,9 @@ public class CustomerWebController {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCustomerById(@PathParam("customerId")long id) { //Positive via Service Adapters
+    public Response getCustomerById(@PathParam("id")long id) { //Positive via Service Adapters
         CustomerDTO customer = cSA.getCustomerById(id);
+        customer = addSelfLink(customer, "getCustomerWithId" + customer.getId());
         return Response.ok(customer).header("Link", Link.customers.getHeaderLink())
                                     .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink())
                                     .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink()).build();
@@ -53,10 +55,7 @@ public class CustomerWebController {
                                  @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
                                  @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
         List<CustomerDTO> customers = cSA.getCustomers(query);
-        customers.stream().forEach(c -> c.setSelf(new Link(uriInfo.getBaseUriBuilder()
-                                                                  .path(CustomerWebController.class)
-                                                                  .path(CustomerWebController.class, "getCustomerById")
-                                                                  .build(c.getId()).toASCIIString(), "getCustomerWithId" + c.getId(), "application/json")));
+        customers = customers.stream().map(c -> addSelfLink(c, "getOrderWithId" + c.getId())).collect(Collectors.toList());
         return Response.ok(customers).header("Link", Link.devices.getHeaderLink())
                                      .header("Link", Link.orders.getHeaderLink())
                                      .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink()).build();
@@ -74,8 +73,7 @@ public class CustomerWebController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
         CustomerDTO result = cSA.updateCustomer(id, customer);
-        addSelfLink(customer, "getCustomer");
-        return Response.ok(result).header("Link", Link.customers.getHeaderLink()).build();
+        return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink()).build();
     }
 
     @DELETE
@@ -85,7 +83,8 @@ public class CustomerWebController {
         return Response.noContent().header("Link", Link.customers.getHeaderLink()).build();
     }
 
-    private void addSelfLink(CustomerDTO customer, String rel) {
-        customer.setSelf(new Link(Link.customers.getHref() + "/" + customer.getId(), rel, "application/json"));
+    private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
+        customer.setSelf(new Link("http://localhost:8080/" + Link.customers.getHref() + "/" + customer.getId(), rel, "application/json"));
+        return customer;
     }
 }
