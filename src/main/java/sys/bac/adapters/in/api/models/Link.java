@@ -44,10 +44,10 @@ public class Link {
     }
     @JsonIgnore
     public String getHeaderLink() {
-        return "<http://localhost:8080/" + href + ">;rel=\"" + rel + "\";type=\"" + type + "\"";
+        return "<" + getHref() + ">;rel=\"" + getRel() + "\";type=\"" + getType() + "\"";
     }
 
     public String toString() {
-        return "Link {href=" + href + "; rel=\"" + rel + "\"; type=\"" + type + "\"}";
+        return "Link {href=" + getHref() + "; rel=\"" + getRel() + "\"; type=\"" + getType() + "\"}";
     }
 }
