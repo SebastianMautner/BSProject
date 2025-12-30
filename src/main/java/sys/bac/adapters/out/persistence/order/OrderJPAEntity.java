@@ -1,13 +1,26 @@
-package sys.bac.adapters.in.api.models;
+package sys.bac.adapters.out.persistence.order;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
+
 import sys.bac.application.domain.models.order.OrderStatus;
 
-public class OrderDTO extends AbstractDataTransferObject {
+@Entity
+@Table(name = "repair_orders")
+public class OrderJPAEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
     private long customerId;
+
+    @Column(nullable = false)
     private String serialNumber;
+
+    @Column(length = 2000)
     private String issueNotes;
 
     private LocalDate receivedAt;
@@ -16,7 +29,16 @@ public class OrderDTO extends AbstractDataTransferObject {
     private float costEstimation;
     private float finalCost;
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    public OrderJPAEntity() {}
+
+    // Getter / Setter
+
+    public long getId() {
+        return id;
+    }
 
     public long getCustomerId() {
         return customerId;
@@ -82,5 +104,3 @@ public class OrderDTO extends AbstractDataTransferObject {
         this.status = status;
     }
 }
-
-

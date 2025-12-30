@@ -1,0 +1,118 @@
+package sys.bac.adapters.in.api.adapter.order;
+
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.GET;
+
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+
+import jakarta.inject.Inject;
+
+import java.util.List;
+
+import sys.bac.adapters.in.api.models.OrderDTO;
+import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.adapters.in.api.models.Link;
+
+
+@Path("orders")
+public class OrderWebController {
+
+    @Inject
+    private OrderServiceAdapter oSA;
+
+    @Context
+    UriInfo uriInfo;
+
+    @GET
+    @Path("{orderId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOrderById(@PathParam("orderId") long id) { 
+        OrderDTO order = oSA.getOrderById(id);
+        return Response.ok(order)
+                .header("Link", Link.orders.getHeaderLink())
+
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
+                .build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOrders(@DefaultValue("") @QueryParam("q") String query,
+                              @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
+                              @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
+        List<OrderDTO> orders = oSA.getOrders(query);
+
+        orders.stream().forEach(o -> o.setSelf(new Link(
+                uriInfo.getBaseUriBuilder()
+                        .path(OrderWebController.class)
+                        .path(OrderWebController.class, "getOrderById")
+                        .build(o.getId()).toASCIIString(),
+                "getOrderWithId" + o.getId(),
+                "application/json"
+        )));
+
+
+        return Response.ok(orders)
+                .header("Link", Link.customers.getHeaderLink())
+                .header("Link", Link.devices.getHeaderLink())
+                .build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response postOrder(@Valid OrderDTO order) {
+        OrderDTO result = oSA.createOrder(order);
+
+
+        return Response.status(Response.Status.CREATED)
+                .header("Link", Link.orders.getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
+                .build();
+    }
+
+    @PUT
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateOrder(@Positive @PathParam("id") long id, OrderDTO order) {
+        OrderDTO result = oSA.updateOrder(id, order);
+        addSelfLink(order, "getOrder");
+        return Response.ok(result).build();
+    }
+
+    @DELETE
+        @Path("{id}")
+        public Response deleteOrder(@PathParam("id") long id) {
+        NoContentResult result = oSA.deleteOrder(id);
+
+        if (result.hasError()) {
+                return Response.status(result.getErrorCode())
+                        .entity(result.getMessage())
+                        .build();
+        }
+
+        return Response.noContent()
+                .header("Link", Link.orders.getHeaderLink())
+                .build();
+        }
+
+        private void addSelfLink(OrderDTO order, String rel) {
+                order.setSelf(new Link(Link.orders.getHref() + "/" + order.getId(),rel,"application/json"));
+        }
+}
