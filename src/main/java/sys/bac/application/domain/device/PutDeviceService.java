@@ -14,19 +14,18 @@ import sys.bac.application.port.out.DeviceRepository;
 @ApplicationScoped
 public class PutDeviceService implements PutDeviceUseCase {
 
-    private final Mapper mapper = new Mapper();
+    private Mapper mapper = new Mapper();
 
     @Inject
     private DeviceRepository deviceRepo;
 
-    @Override
     public NoContentResult updateDevice(LongId id, DeviceDTO device) {
         DeviceResult exists = deviceRepo.getDeviceById(id);
         NoContentResult result = new NoContentResult();
-        
+
         if (exists.isEmpty()) {
             result.setError(404, "NotFound");
-        } else if (exists.hasError()) {
+        } else if (exists.hasError()){
             result.setError(500, exists.getMessage());
         } else {
             result = deviceRepo.update(id, mapper.toDevice(device));
