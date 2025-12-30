@@ -3,29 +3,34 @@ package sys.bac.adapters.in.api.models;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import sys.bac.application.domain.models.order.OrderStatus;
 
 public class OrderDTO extends AbstractDataTransferObject {
 
-    @NotBlank
+    @Positive
     private long customerId;
 
-    @NotBlank
+    @Positive
     private long deviceId;
+
     @NotBlank
     private String issueNotes;
 
-    @NotBlank
+    @NotNull
     private LocalDate receivedAt;
 
     private LocalDate completion;
 
-    @NotBlank
+    @PositiveOrZero
     private float costEstimation;
-    
+
+    @PositiveOrZero
     private float finalCost;
 
-    @NotBlank
+    @NotNull
     private OrderStatus status;
 
     public long getCustomerId() {

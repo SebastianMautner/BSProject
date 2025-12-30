@@ -1,12 +1,13 @@
 package sys.bac.adapters.in.api.models;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 public class DeviceDTO extends AbstractDataTransferObject {
 
-    @NotBlank
+    @Positive
     private long customerId;
-    
+
     @NotBlank
     private String serialNumber;
 
@@ -21,6 +22,7 @@ public class DeviceDTO extends AbstractDataTransferObject {
 
     @NotBlank
     private String notes;
+
 
     public long getCustomerId() { return customerId; }
     public void setCustomerId(long customerId) { this.customerId = customerId; }
