@@ -7,6 +7,7 @@ import sys.bac.adapters.in.api.adapter.device.Mapper;
 import sys.bac.adapters.in.api.models.DeviceDTO;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.application.domain.results.device.DeviceResult;
 import sys.bac.application.port.in.device.PutDeviceUseCase;
 import sys.bac.application.port.out.DeviceRepository;
 
@@ -20,7 +21,17 @@ public class PutDeviceService implements PutDeviceUseCase {
 
     @Override
     public NoContentResult updateDevice(LongId id, DeviceDTO device) {
-        return deviceRepo.update(id, mapper.toDevice(device));
+        DeviceResult exists = deviceRepo.getDeviceById(id);
+        NoContentResult result = new NoContentResult();
+        
+        if (exists.isEmpty()) {
+            result.setError(404, "NotFound");
+        } else if (exists.hasError()) {
+            result.setError(500, exists.getMessage());
+        } else {
+            result = deviceRepo.update(id, mapper.toDevice(device));
+        }
+        return result;
     }
 }
 

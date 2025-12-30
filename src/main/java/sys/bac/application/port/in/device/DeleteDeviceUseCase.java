@@ -4,6 +4,6 @@ import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
 
 public interface DeleteDeviceUseCase {
-    NoContentResult deleteDevice(LongId id);
+    public NoContentResult deleteDevice(LongId id);
 }
 

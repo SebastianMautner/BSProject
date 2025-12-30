@@ -8,6 +8,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import sys.bac.adapters.in.api.adapter.DispatcherService;
 import sys.bac.adapters.in.api.adapter.customer.CustomerWebController;
+import sys.bac.adapters.in.api.adapter.device.DeviceWebController;
 import sys.bac.adapters.in.api.adapter.order.OrderWebController;
 import sys.bac.adapters.in.api.models.Link;
 
@@ -24,9 +25,9 @@ public class ServerErrorMapper implements ExceptionMapper<InternalServerErrorExc
         } else if (resourceClass == OrderWebController.class) {
             return Response.serverError().header("Link", Link.orders.getHeaderLink()).build();
         }
-        // else if(resourceClass == DeviceWebController.class) {
-        //     return Response.serverError().header("Link", Link.devices.getHeaderLink()).build();
-        // }
+        else if(resourceClass == DeviceWebController.class) {
+            return Response.serverError().header("Link", Link.devices.getHeaderLink()).build();
+        }
         else if (resourceClass == DispatcherService.class) {
             return Response.serverError().header("Link", new Link("http://localhost:8080/", "tryDispatcherAgain", "application/json")).build();
         }

@@ -18,7 +18,7 @@ public class OrderJPAEntity {
     private long customerId;
 
     @Column(nullable = false)
-    private String serialNumber;
+    private long deviceId;
 
     @Column(length = 2000)
     private String issueNotes;
@@ -48,12 +48,12 @@ public class OrderJPAEntity {
         this.customerId = customerId;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public long getDeviceId() {
+        return deviceId;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getIssueNotes() {

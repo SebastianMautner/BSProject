@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class PostCustomerService implements PostCustomerUseCase{
 
-    private Mapper mapper = new Mapper();
+    private final Mapper mapper = new Mapper();
 
     @Inject
     private CustomerRepository customerRepo;

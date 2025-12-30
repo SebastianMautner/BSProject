@@ -13,7 +13,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class PutCustomerService implements PutCustomerUseCase{
 
-    private Mapper mapper = new Mapper();
+    private final Mapper mapper = new Mapper();
 
     @Inject
     private CustomerRepository customerRepo;

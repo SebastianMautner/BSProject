@@ -95,7 +95,7 @@ public class OrderJpaAdapter implements OrderRepository {
             OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
             eM.detach(entity);
             entity.setCustomerId(order.getCustomerId());
-            entity.setSerialNumber(order.getSerialNumber());
+            entity.setDeviceId(order.getDeviceId());
             entity.setIssueNotes(order.getIssueNotes());
             entity.setReceivedAt(order.getReceivedAt());
             entity.setCompletion(order.getCompletion());

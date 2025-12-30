@@ -9,7 +9,7 @@ public class Mapper {
     public OrderJPAEntity toJPA(Order order) {
         OrderJPAEntity e = new OrderJPAEntity();
         e.setCustomerId(order.getCustomerId());
-        e.setSerialNumber(order.getSerialNumber());
+        e.setDeviceId(order.getDeviceId());
         e.setIssueNotes(order.getIssueNotes());
         e.setReceivedAt(order.getReceivedAt());
         e.setCompletion(order.getCompletion());
@@ -23,7 +23,7 @@ public class Mapper {
         return new Order(
                 new LongId(e.getId()),
                 e.getCustomerId(),
-                e.getSerialNumber(),
+                e.getDeviceId(),
                 e.getIssueNotes(),
                 e.getReceivedAt(),
                 e.getCompletion(),

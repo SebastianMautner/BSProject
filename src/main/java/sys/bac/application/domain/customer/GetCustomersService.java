@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class GetCustomersService implements GetCustomersUseCase{ // might unify the Services in to one class
+public class GetCustomersService implements GetCustomersUseCase{
 
     @Inject
     private CustomerRepository customerRepo;

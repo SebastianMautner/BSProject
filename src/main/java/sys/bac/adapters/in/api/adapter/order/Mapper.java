@@ -10,7 +10,7 @@ public class Mapper {
         return new Order(
                 new LongId(dto.getId()),
                 dto.getCustomerId(),
-                dto.getSerialNumber(),
+                dto.getDeviceId(),
                 dto.getIssueNotes(),
                 dto.getReceivedAt(),
                 dto.getCompletion(),
@@ -24,7 +24,7 @@ public class Mapper {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
         dto.setCustomerId(order.getCustomerId());
-        dto.setSerialNumber(order.getSerialNumber());
+        dto.setDeviceId(order.getDeviceId());
         dto.setIssueNotes(order.getIssueNotes());
         dto.setReceivedAt(order.getReceivedAt());
         dto.setCompletion(order.getCompletion());

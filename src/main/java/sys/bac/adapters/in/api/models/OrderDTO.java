@@ -10,7 +10,7 @@ public class OrderDTO extends AbstractDataTransferObject {
     @NotBlank
     private long customerId;
     @NotBlank
-    private String serialNumber;
+    private long deviceId;
     @NotBlank
     private String issueNotes;
 
@@ -34,12 +34,12 @@ public class OrderDTO extends AbstractDataTransferObject {
         this.customerId = customerId;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public long getDeviceId() {
+        return deviceId;
     }
 
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getIssueNotes() {

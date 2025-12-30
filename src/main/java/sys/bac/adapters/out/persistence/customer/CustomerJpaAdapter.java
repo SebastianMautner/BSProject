@@ -21,7 +21,7 @@ import sys.bac.application.port.out.CustomerRepository;
 @ApplicationScoped
 public class CustomerJpaAdapter implements CustomerRepository{
 
-    private Mapper mapper = new Mapper();
+    private final Mapper mapper = new Mapper();
 
     @Inject
     private EntityManager eM;
@@ -48,7 +48,11 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
             cQ.select(root);
-            list = eM.createQuery(cQ).getResultList().stream().map(mapper::toCustomer).collect(Collectors.toList());
+            list = eM.createQuery(cQ)
+            .getResultList()
+            .stream()
+            .map(mapper::toCustomer)
+            .collect(Collectors.toList());
         }
         catch ( Exception e) {
             result.setError(500, e.getMessage());

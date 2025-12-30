@@ -8,7 +8,7 @@ public class Order {
 
     private LongId id;
     private long customerId;
-    private String serialNumber;
+    private long deviceId;
     private String issueNotes;
 
     private LocalDate receivedAt;
@@ -27,7 +27,7 @@ public class Order {
 
     public Order(LongId id,
                  long customerId,
-                 String serialNumber,
+                 long deviceId,
                  String issueNotes,
                  LocalDate receivedAt,
                  LocalDate completion,
@@ -36,7 +36,7 @@ public class Order {
                  OrderStatus status) {
         this.id = id;
         this.customerId = customerId;
-        this.serialNumber = serialNumber;
+        this.deviceId = deviceId;
         this.issueNotes = issueNotes;
         this.receivedAt = receivedAt;
         this.completion = completion;
@@ -57,8 +57,8 @@ public class Order {
         return customerId;
     }
 
-    public String getSerialNumber() {
-        return serialNumber;
+    public long getDeviceId() {
+        return deviceId;
     }
 
     public String getIssueNotes() {

@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.application.domain.results.device.DeviceResult;
 import sys.bac.application.port.in.device.DeleteDeviceUseCase;
 import sys.bac.application.port.out.DeviceRepository;
 
@@ -16,7 +17,16 @@ public class DeleteDeviceService implements DeleteDeviceUseCase {
 
     @Override
     public NoContentResult deleteDevice(LongId id) {
-        return deviceRepo.delete(id);
+        DeviceResult exists = deviceRepo.getDeviceById(id);
+        NoContentResult result = new NoContentResult();
+        if (exists.isEmpty()) {
+            result.setError(404, "NotFound");
+        } else if (exists.hasError()) {
+            result.setError(500, exists.getMessage());
+        } else {
+            result = deviceRepo.delete(id);
+        }
+        return result;
     }
 }
 
