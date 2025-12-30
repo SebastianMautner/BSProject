@@ -2,6 +2,7 @@ package sys.bac.adapters.out.persistence.order;
 
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
+import sys.bac.application.domain.results.order.OrderResult;
 
 public class Mapper {
 
@@ -30,5 +31,13 @@ public class Mapper {
                 e.getFinalCost(),
                 e.getStatus()
         );
+    }
+
+    public OrderResult toOrderResult(Order o) {
+        return new OrderResult(o);
+    }
+
+    public OrderResult toOrderResult(OrderJPAEntity o) {
+        return toOrderResult(o);
     }
 }

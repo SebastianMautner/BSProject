@@ -9,9 +9,8 @@ import sys.bac.application.port.in.customer.GetCustomerByIdUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 
 @ApplicationScoped
-public class GetCustomerService implements GetCustomerByIdUseCase{ // might unify the Services in to one class
+public class GetCustomerService implements GetCustomerByIdUseCase{
     
-
     @Inject
     private CustomerRepository customerRepo;
 

@@ -70,7 +70,8 @@ public class OrderServiceAdapter {
     }
 
     public void updateOrder(long id, OrderDTO dto) {
-        NoContentResult result = putOrderUC.updateOrder(id, dto);
+        LongId oId = new LongId(id);
+        NoContentResult result = putOrderUC.updateOrder(oId, dto);
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if (result.hasError()) {

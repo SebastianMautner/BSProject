@@ -15,13 +15,13 @@ public class DeleteCustomerService implements DeleteCustomerUseCase{
     private CustomerRepository customerRepo;
 
     public NoContentResult deleteCustomer(LongId id) {
-        CustomerResult extists = customerRepo.getCustomerById(id);
+        CustomerResult exists = customerRepo.getCustomerById(id);
         NoContentResult result = new NoContentResult();
         
-        if (extists.isEmpty()) {
+        if (exists.isEmpty()) {
             result.setError(404, "NotFound");
-        } else if (extists.hasError()) {
-            result.setError(500, extists.getMessage());
+        } else if (exists.hasError()) {
+            result.setError(500, exists.getMessage());
         } else {
             result = customerRepo.delete(id);
         }

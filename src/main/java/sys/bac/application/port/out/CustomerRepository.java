@@ -16,5 +16,5 @@ public interface CustomerRepository {
 
     NoContentResult delete(LongId id);
 
-    CustomerResult update(LongId id, Customer customer);
+    NoContentResult update(LongId id, Customer customer);
 }

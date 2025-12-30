@@ -48,7 +48,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
             cQ.select(root);
-            list = eM.createQuery(cQ).getResultList().stream().map(customer -> mapper.toCustomer(customer)).collect(Collectors.toList());
+            list = eM.createQuery(cQ).getResultList().stream().map(mapper::toCustomer).collect(Collectors.toList());
         }
         catch ( Exception e) {
             result.setError(500, e.getMessage());
@@ -81,8 +81,8 @@ public class CustomerJpaAdapter implements CustomerRepository{
     }
 
     @Transactional
-    public CustomerResult update(LongId id, Customer customer) {
-        CustomerResult result = new CustomerResult();
+    public NoContentResult update(LongId id, Customer customer) {
+        NoContentResult result = new NoContentResult();
         try {
             CustomerJPAEntity c = eM.find(CustomerJPAEntity.class, id.getId());
             eM.detach(c);
@@ -91,7 +91,6 @@ public class CustomerJpaAdapter implements CustomerRepository{
             c.setEMail(customer.getEMail());
             c.setPhone(customer.getPhone());
             eM.merge(c);
-            result.setResult(mapper.toCustomer(c));
         }
         catch(Exception e) {
             result.setError(500, e.getMessage());
