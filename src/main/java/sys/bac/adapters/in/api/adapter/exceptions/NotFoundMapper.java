@@ -30,12 +30,12 @@ public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
         }
         else if (resourceClass == DispatcherService.class) {
             return Response.status(404)
-            .header("Link", new Link("http://localhost:8080/", "getDispatcherService", "application/json")).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json")).build();
         }
         else {
             return Response.status(404)
             .header("How", "YouFailedHypermedia")
-            .header("Link", new Link("http://localhost:8080/", "getDispatcherService", "application/json")).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json")).build();
         }
         
     }

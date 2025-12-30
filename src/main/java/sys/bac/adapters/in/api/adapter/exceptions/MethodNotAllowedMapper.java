@@ -1,6 +1,6 @@
 package sys.bac.adapters.in.api.adapter.exceptions;
 
-import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -13,30 +13,29 @@ import sys.bac.adapters.in.api.adapter.order.OrderWebController;
 import sys.bac.adapters.in.api.models.Link;
 
 @Provider
-public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
-    
+public class MethodNotAllowedMapper implements ExceptionMapper<NotAllowedException>{
     @Context
     private ResourceInfo resource;
     
-    public Response toResponse(BadRequestException ex) {
+    public Response toResponse(NotAllowedException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(400).header("Link", Link.customers.getHeaderLink()).build();
+            return Response.status(405).header("Link", Link.customers.getHeaderLink()).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(400).header("Link", Link.orders.getHeaderLink()).build();
+            return Response.status(405).header("Link", Link.orders.getHeaderLink()).build();
         }
         else if (resourceClass == DeviceWebController.class) {
-            return Response.status(400).header("Link", Link.devices.getHeaderLink()).build();
+            return Response.status(405).header("Link", Link.devices.getHeaderLink()).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.status(400)
-            .header("Link", new Link("", "getDispatcherService", "application/json")).build();
+            return Response.status(405)
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         else {
-            return Response.status(400)
+            return Response.status(405)
             .header("How", "YouFailedHypermedia")
-            .header("Link", new Link("", "getDispatcherService", "application/json")).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         
     }
