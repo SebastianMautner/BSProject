@@ -17,8 +17,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
@@ -27,7 +25,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
-import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.adapters.in.api.models.Link;
 
 
@@ -36,16 +33,13 @@ public class OrderWebController {
         
         @Inject
         private OrderServiceAdapter oSA;
-        
-        @Context
-        UriInfo uriInfo;
-        
+
         @GET
         @Path("{orderId}")
         @Produces(MediaType.APPLICATION_JSON)
         public Response getOrderById(@PathParam("orderId") long id) { 
                 OrderDTO order = oSA.getOrderById(id);
-                addSelfLink(order, "getOrderWithId" + order.getId());
+                order = addSelfLink(order, "getOrderWithId" + order.getId());
                 return Response.ok(order)
                 .header("Link", Link.orders.getHeaderLink())
                 .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
@@ -74,29 +68,22 @@ public class OrderWebController {
                 
                 
                 return Response.status(Response.Status.CREATED)
-                .header("Link", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
+                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
                 .build();
         }
         
         @PUT
         @Path("{id}")
         @Consumes(MediaType.APPLICATION_JSON)
-        public Response updateOrder(@Positive @PathParam("id") long id, OrderDTO order) {
-                OrderDTO result = oSA.updateOrder(id, order);
-                return Response.noContent().header("Link", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink()).build();
+        public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order) {
+                oSA.updateOrder(id, order);
+                return Response.noContent().header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink()).build();
         }
         
         @DELETE
         @Path("{id}")
         public Response deleteOrder(@PathParam("id") long id) {
-                NoContentResult result = oSA.deleteOrder(id);
-                
-                if (result.hasError()) {
-                        return Response.status(result.getErrorCode())
-                        .entity(result.getMessage())
-                        .build();
-                }
-                
+                oSA.deleteOrder(id);
                 return Response.noContent()
                 .header("Link", Link.orders.getHeaderLink())
                 .build();

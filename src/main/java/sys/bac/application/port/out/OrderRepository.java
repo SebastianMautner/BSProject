@@ -5,7 +5,7 @@ import java.util.List;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.domain.results.OrderResult;
+import sys.bac.application.domain.results.order.OrderResult;
 
 public interface OrderRepository {
 
@@ -17,5 +17,5 @@ public interface OrderRepository {
 
     NoContentResult delete(LongId id);
 
-    void update(LongId id, Order order);
+    OrderResult update(LongId id, Order order);
 }

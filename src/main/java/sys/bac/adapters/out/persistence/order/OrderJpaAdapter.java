@@ -15,7 +15,7 @@ import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.domain.results.OrderResult;
+import sys.bac.application.domain.results.order.OrderResult;
 import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped
@@ -95,7 +95,7 @@ public class OrderJpaAdapter implements OrderRepository {
 
     @Transactional
     @Override
-    public void update(LongId id, Order order) {
+    public OrderResult update(LongId id, Order order) {
         OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
         if (entity == null) {
             throw new IllegalArgumentException("Order not found: " + id.getId());

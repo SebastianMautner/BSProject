@@ -9,14 +9,14 @@ import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import sys.bac.adapters.in.api.models.CustomerDTO;
 import sys.bac.application.domain.models.LongId;
-import sys.bac.application.domain.results.CustomerResult;
-import sys.bac.application.domain.results.CustomersResult;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.DeleteCustomerUseCase;
-import sys.bac.application.port.in.GetCustomerByIdUseCase;
-import sys.bac.application.port.in.GetCustomersUseCase;
-import sys.bac.application.port.in.PostCustomerUseCase;
-import sys.bac.application.port.in.PutCustomerUseCase;
+import sys.bac.application.domain.results.customer.CustomerResult;
+import sys.bac.application.domain.results.customer.CustomersResult;
+import sys.bac.application.port.in.customer.DeleteCustomerUseCase;
+import sys.bac.application.port.in.customer.GetCustomerByIdUseCase;
+import sys.bac.application.port.in.customer.GetCustomersUseCase;
+import sys.bac.application.port.in.customer.PostCustomerUseCase;
+import sys.bac.application.port.in.customer.PutCustomerUseCase;
 
 @ApplicationScoped
 public class CustomerServiceAdapter {
@@ -65,20 +65,16 @@ public class CustomerServiceAdapter {
         if(result.hasError()) {
             throw new InternalServerErrorException(result.getMessage());
         }
-        else {
-            return mapper.toDTO(result.getResult());
-        }
+        return mapper.toDTO(result.getResult());
     }
     
-    public CustomerDTO updateCustomer(long id, CustomerDTO customer) {
+    public void updateCustomer(long id, CustomerDTO customer) {
         LongId cId =  new LongId(id);
-        CustomerResult result = puCUC.updateCustomer(cId, customer);
-        if (result.isEmpty()) {
+        NoContentResult result = puCUC.updateCustomer(cId, customer);
+        if (result.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if (result.hasError()) {
             throw new InternalServerErrorException(result.getMessage());
-        } else {
-            return mapper.toDTO(result.getResult());
         }
     }
     

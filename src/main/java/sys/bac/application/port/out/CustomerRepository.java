@@ -2,9 +2,9 @@ package sys.bac.application.port.out;
 
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
-import sys.bac.application.domain.results.CustomerResult;
-import sys.bac.application.domain.results.CustomersResult;
 import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.application.domain.results.customer.CustomerResult;
+import sys.bac.application.domain.results.customer.CustomersResult;
 
 public interface CustomerRepository {
 

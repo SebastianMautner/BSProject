@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 
 import sys.bac.adapters.in.api.adapter.order.Mapper;
 import sys.bac.adapters.in.api.models.OrderDTO;
-import sys.bac.application.port.in.GetOrdersUseCase;
+import sys.bac.application.port.in.order.GetOrdersUseCase;
 import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped

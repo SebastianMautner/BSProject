@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import sys.bac.adapters.in.api.adapter.order.Mapper;
 import sys.bac.adapters.in.api.models.OrderDTO;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.PostOrderUseCase;
+import sys.bac.application.port.in.order.PostOrderUseCase;
 import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped

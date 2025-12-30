@@ -3,9 +3,9 @@ package sys.bac.application.domain.customer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import sys.bac.application.domain.models.LongId;
-import sys.bac.application.domain.results.CustomerResult;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.DeleteCustomerUseCase;
+import sys.bac.application.domain.results.customer.CustomerResult;
+import sys.bac.application.port.in.customer.DeleteCustomerUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 
 @ApplicationScoped

@@ -1,7 +1,7 @@
 package sys.bac.application.domain.customer;
 
-import sys.bac.application.domain.results.CustomersResult;
-import sys.bac.application.port.in.GetCustomersUseCase;
+import sys.bac.application.domain.results.customer.CustomersResult;
+import sys.bac.application.port.in.customer.GetCustomersUseCase;
 import sys.bac.application.port.out.CustomerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

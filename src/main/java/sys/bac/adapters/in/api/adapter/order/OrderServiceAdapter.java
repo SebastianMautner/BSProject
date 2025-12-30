@@ -2,17 +2,22 @@ package sys.bac.adapters.in.api.adapter.order;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
+import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.domain.results.OrderResult;
-import sys.bac.application.port.in.DeleteOrderUseCase;
-import sys.bac.application.port.in.GetOrderByIdUseCase;
-import sys.bac.application.port.in.GetOrdersUseCase;
-import sys.bac.application.port.in.PostOrderUseCase;
-import sys.bac.application.port.in.PutOrderUseCase;
+import sys.bac.application.domain.results.order.OrderResult;
+import sys.bac.application.domain.results.order.OrdersResult;
+import sys.bac.application.port.in.order.DeleteOrderUseCase;
+import sys.bac.application.port.in.order.GetOrderByIdUseCase;
+import sys.bac.application.port.in.order.GetOrdersUseCase;
+import sys.bac.application.port.in.order.PostOrderUseCase;
+import sys.bac.application.port.in.order.PutOrderUseCase;
 
 @ApplicationScoped
 public class OrderServiceAdapter {
@@ -35,35 +40,52 @@ public class OrderServiceAdapter {
     private final Mapper mapper = new Mapper();
 
     public OrderDTO getOrderById(long id) {
-        OrderResult res = getOrderByIdUC.loadOrderById(id);
+        LongId oId = new LongId(id);
+        OrderResult res = getOrderByIdUC.loadOrderById(oId);
+        if (res.isEmpty()) {
+            throw new NotFoundException();
+        } else if (res.hasError()) {
+            throw new IllegalArgumentException(res.getMessage());
+        }
+        else {
+            return mapper.toDTO(res.getResult());
+        }
+        
+    }
+
+    public List<OrderDTO> getOrders(String query) {
+        OrdersResult result = getOrdersUC.findOrders(query);
+        if(result.hasError()) {
+            throw new InternalServerErrorException(result.getMessage());
+        }
+        return result.getResult().stream().map(o -> mapper.toDTO(o)).collect(Collectors.toList()); 
+    }
+
+    public OrderDTO createOrder(OrderDTO dto) {
+        OrderResult res = postOrderUC.createOrder(dto);
         if (res.hasError()) {
-            
             throw new IllegalArgumentException(res.getMessage());
         }
         return mapper.toDTO(res.getResult());
     }
 
-    public List<OrderDTO> getOrders(String query) {
-    
-        return getOrdersUC.findOrders();
-    }
-
-    public OrderDTO createOrder(OrderDTO dto) {
-        NoContentResult res = postOrderUC.createOrder(dto);
-        if (res.hasError()) {
-            throw new IllegalArgumentException(res.getMessage());
+    public void updateOrder(long id, OrderDTO dto) {
+        NoContentResult result = putOrderUC.updateOrder(id, dto);
+        if (result.getErrorCode() == 404) {
+            throw new NotFoundException();
+        } else if (result.hasError()) {
+            throw new InternalServerErrorException(result.getMessage());
         }
-        dto.setId(res.getId());
-        return dto;
     }
 
-    public OrderDTO updateOrder(long id, OrderDTO dto) {
-        putOrderUC.updateOrder(id, dto);
-        dto.setId(id);
-        return dto;
-    }
-
-    public NoContentResult deleteOrder(long id) {
-        return deleteOrderUC.deleteOrder(id);
+    public void deleteOrder(long id) {
+        LongId oId = new LongId(id);
+        NoContentResult result= deleteOrderUC.deleteOrder(oId);
+        if (result.getErrorCode() == 404) {
+            throw new NotFoundException();
+        } 
+        else if (result.hasError()) {
+            throw new InternalServerErrorException(result.getMessage());
+        }
     }
 }

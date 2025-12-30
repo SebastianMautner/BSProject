@@ -1,6 +1,7 @@
-package sys.bac.application.domain.results;
+package sys.bac.application.domain.results.order;
 
 import sys.bac.application.domain.models.order.Order;
+import sys.bac.application.domain.results.SingleResult;
 
 public class OrderResult extends SingleResult<Order> {
 

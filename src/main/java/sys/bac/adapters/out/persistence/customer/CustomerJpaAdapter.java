@@ -13,9 +13,9 @@ import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
-import sys.bac.application.domain.results.CustomerResult;
-import sys.bac.application.domain.results.CustomersResult;
 import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.application.domain.results.customer.CustomerResult;
+import sys.bac.application.domain.results.customer.CustomersResult;
 import sys.bac.application.port.out.CustomerRepository;
 
 @ApplicationScoped

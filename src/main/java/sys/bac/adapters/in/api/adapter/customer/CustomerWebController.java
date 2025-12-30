@@ -17,8 +17,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
@@ -34,9 +32,6 @@ public class CustomerWebController {
 
     @Inject
     private  CustomerServiceAdapter cSA;
-
-    @Context
-    UriInfo uriInfo;
     
     @GET
     @Path("{id}")
@@ -65,15 +60,15 @@ public class CustomerWebController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postCustomer(@Valid CustomerDTO customer) {
         CustomerDTO result = cSA.createCustomer(customer);
-        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getPerson", "application/json").getHeaderLink()).build();
+        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink()).build();
     }
 
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
-        CustomerDTO result = cSA.updateCustomer(id, customer);
-        return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink()).build();
+    public Response updateCustomer(@Positive @PathParam("id") long id, @Valid CustomerDTO customer) {
+        cSA.updateCustomer(id, customer);
+        return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink()).build();
     }
 
     @DELETE

@@ -1,7 +1,7 @@
 package sys.bac.adapters.out.persistence.customer;
 
 import sys.bac.application.domain.models.customer.Customer;
-import sys.bac.application.domain.results.CustomerResult;
+import sys.bac.application.domain.results.customer.CustomerResult;
 
 public class Mapper {
 

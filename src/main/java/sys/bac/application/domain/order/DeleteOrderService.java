@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
-import sys.bac.application.port.in.DeleteOrderUseCase;
+import sys.bac.application.port.in.order.DeleteOrderUseCase;
 import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped
