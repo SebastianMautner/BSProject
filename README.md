@@ -26,7 +26,6 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-Devices: everything (being worked on)
 Hypermedia in case of error (e.g. NotFoundException)
 Pagination
 Docker?
