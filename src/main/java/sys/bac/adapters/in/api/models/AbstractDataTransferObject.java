@@ -4,7 +4,7 @@ import java.io.Serializable;
 import jakarta.validation.constraints.PositiveOrZero;
 
 
-public abstract class AbstractDataTransferObject implements Serializable { // apparently there's also a primary id, seperate from the id, idk why tho
+public abstract class AbstractDataTransferObject implements Serializable {
     @PositiveOrZero
     protected long id;
     
