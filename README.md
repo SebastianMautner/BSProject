@@ -26,14 +26,19 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-Order: everything
-Devices: everything
-Customer: some more mult options
-Hypermedia
+Order: everything (being worked on)
+Devices: everything (being worked on)
+Customer: some more mult options, GetById has some problems, Delete has many problems
+Hypermedia in case of error (e.g. NotFoundException)
 Pagination
 Docker?
 Caching
 other use cases
+ReadMe
+
+Open Questions:
+What the fuck does he mean with the whole docker bullshit?
+
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -57,14 +57,16 @@ public class CustomerWebController {
                                                                   .path(CustomerWebController.class)
                                                                   .path(CustomerWebController.class, "getCustomerById")
                                                                   .build(c.getId()).toASCIIString(), "getCustomerWithId" + c.getId(), "application/json")));
-        return Response.ok(customers).header("Link", Link.devices.getHeaderLink()).header("Link", Link.orders.getHeaderLink()).build();
+        return Response.ok(customers).header("Link", Link.devices.getHeaderLink())
+                                     .header("Link", Link.orders.getHeaderLink())
+                                     .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink()).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postCustomer(@Valid CustomerDTO customer) {
         CustomerDTO result = cSA.createCustomer(customer);
-        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers + "/" + result.getId(), "getPerson", "application/json").getHeaderLink()).build();
+        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getPerson", "application/json").getHeaderLink()).build();
     }
 
     @PUT
@@ -73,7 +75,7 @@ public class CustomerWebController {
     public Response updateCustomer(@Positive @PathParam("id") long id, CustomerDTO customer) {
         CustomerDTO result = cSA.updateCustomer(id, customer);
         addSelfLink(customer, "getCustomer");
-        return Response.ok(result).build();
+        return Response.ok(result).header("Link", Link.customers.getHeaderLink()).build();
     }
 
     @DELETE

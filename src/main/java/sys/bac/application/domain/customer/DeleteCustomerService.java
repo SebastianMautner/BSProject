@@ -23,7 +23,7 @@ public class DeleteCustomerService implements DeleteCustomerUseCase{
         } else if (extists.hasError()) {
             result.setError(500, extists.getMessage());
         } else {
-            result = deleteCustomer(id);
+            result = customerRepo.delete(id);
         }
         return result;
     }

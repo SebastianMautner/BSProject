@@ -3,6 +3,7 @@ package sys.bac.adapters.in.api.adapter.customer;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
@@ -17,6 +18,7 @@ import sys.bac.application.port.in.GetCustomersUseCase;
 import sys.bac.application.port.in.PostCustomerUseCase;
 import sys.bac.application.port.in.PutCustomerUseCase;
 
+@ApplicationScoped
 public class CustomerServiceAdapter {
     
     @Inject
