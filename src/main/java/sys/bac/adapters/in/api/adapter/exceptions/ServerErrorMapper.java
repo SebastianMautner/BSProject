@@ -32,7 +32,7 @@ public class ServerErrorMapper implements ExceptionMapper<InternalServerErrorExc
             return Response.serverError().header("Link", new Link("", "tryDispatcherAgain", "application/json").getHeaderLink()).build();
         }
         else {
-            return Response.serverError().header("Class", resourceClass.getName()).header("Link", new Link("http://localhost/", "tryDispatcher", "application/json").getHeaderLink()).build();
+            return Response.serverError().header("Class", resourceClass.getName()).header("Link", new Link("", "tryDispatcher", "application/json").getHeaderLink()).build();
         }
         
     }

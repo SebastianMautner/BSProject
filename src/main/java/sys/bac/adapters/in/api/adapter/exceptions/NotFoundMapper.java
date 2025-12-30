@@ -35,7 +35,7 @@ public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
         else {
             return Response.status(404)
             .header("How", "YouFailedHypermedia")
-            .header("Link", new Link("http://localhost/", "getDispatcherService", "application/json").getHeaderLink()).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         
     }

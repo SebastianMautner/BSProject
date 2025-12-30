@@ -35,7 +35,7 @@ public class MethodNotAllowedMapper implements ExceptionMapper<NotAllowedExcepti
         else {
             return Response.status(405)
             .header("How", "YouFailedHypermedia")
-            .header("Link", new Link("http://localhost/", "getDispatcherService", "application/json").getHeaderLink()).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         
     }
