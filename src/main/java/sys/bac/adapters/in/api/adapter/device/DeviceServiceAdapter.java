@@ -1,12 +1,12 @@
 package sys.bac.adapters.in.api.adapter.device;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import sys.bac.adapters.in.api.models.DevicesApiResult;
 import sys.bac.adapters.in.api.models.DeviceDTO;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.results.NoContentResult;
@@ -29,12 +29,16 @@ public class DeviceServiceAdapter {
     @Inject private PutDeviceUseCase putDevice;
     @Inject private DeleteDeviceUseCase deleteDevice;
 
-    public List<DeviceDTO> getDevices(String query) {
-        DevicesResult res = getDevices.findDevices(query);
-        if(res.hasError()) {
-            throw new InternalServerErrorException(res.getMessage());
+    public DevicesApiResult getDevices(String query, int offset, int size) {
+        DevicesResult devices = getDevices.findDevices(query, offset, size);
+        if(devices.hasError()) {
+            throw new InternalServerErrorException(devices.getMessage());
         }
-        return res.getResult().stream().map(mapper::toDTO).collect(Collectors.toList());
+        DevicesApiResult result = new DevicesApiResult(devices.getResult().getResult()
+        .stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList()), devices.getResult().getTotalElements() > offset + size, offset != 0);
+        return result;
     }
 
     public DeviceDTO getDeviceById(long id) {

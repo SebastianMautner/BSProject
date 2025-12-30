@@ -49,12 +49,13 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
             cQ.select(root);
+
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
             .setMaxResults(size)
             .getResultList()
             .stream()
-            .map(c -> mapper.toCustomer(c))
+            .map(mapper::toCustomer)
             .collect(Collectors.toList());
         }
         catch ( Exception e) {
