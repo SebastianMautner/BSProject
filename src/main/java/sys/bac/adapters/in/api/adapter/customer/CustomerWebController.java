@@ -52,7 +52,7 @@ public class CustomerWebController {
         size = Math.min(size, 100);
         
         CustomersApiResult customers = cSA.getCustomers(query, offset, size);
-        customers.setResult(customers.getResult().stream().map(c -> addSelfLink(c, "getOrderWithId" + c.getId())).collect(Collectors.toList()));
+        customers.setResult(customers.getResult().stream().map(c -> addSelfLink(c, "getCustomerWithId" + c.getId())).collect(Collectors.toList()));
         
         if (customers.next() && customers.prev()) {
             return Response.ok(customers.getResult())

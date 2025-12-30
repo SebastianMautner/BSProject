@@ -48,7 +48,6 @@ public class DeviceJpaAdapter implements DeviceRepository {
         } catch (Exception e) {
             result.setError(500, e.getMessage());
         }
-        
         result.setResult(list);
         return result;
     }

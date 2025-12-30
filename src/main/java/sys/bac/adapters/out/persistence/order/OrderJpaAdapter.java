@@ -11,12 +11,12 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
-
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
+import sys.bac.application.domain.results.LongResult;
 import sys.bac.application.domain.results.NoContentResult;
+import sys.bac.application.domain.results.order.JpaOrdersResult;
 import sys.bac.application.domain.results.order.OrderResult;
-import sys.bac.application.domain.results.order.OrdersResult;
 import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped
@@ -27,9 +27,10 @@ public class OrderJpaAdapter implements OrderRepository {
     @Inject
     private EntityManager eM;
     
-    public OrdersResult getAllOrders(String query) {
+    public JpaOrdersResult getAllOrders(String query, int offset, int size) {
         List<Order> list = new ArrayList<>();
-        OrdersResult result = new OrdersResult();
+        JpaOrdersResult result = new JpaOrdersResult();
+
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<OrderJPAEntity> cQ = cB.createQuery(OrderJPAEntity.class);
@@ -37,6 +38,8 @@ public class OrderJpaAdapter implements OrderRepository {
             cQ.select(root);
             
             list = eM.createQuery(cQ)
+            .setFirstResult(offset)
+            .setMaxResults(size)
             .getResultList()
             .stream()
             .map(mapper::toOrder)
@@ -107,6 +110,23 @@ public class OrderJpaAdapter implements OrderRepository {
         catch (Exception e) {
             result.setError(500, e.getMessage());
         }
+        return result;
+    }
+
+    public LongResult count() {
+        LongResult result = new LongResult();
+        long amount = -1;
+        try {
+            CriteriaBuilder cB = eM.getCriteriaBuilder();
+            CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
+            Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
+            cQ.select(cB.count(root));
+            amount = eM.createQuery(cQ).getSingleResult();
+        }
+        catch ( Exception e) {
+            result.setError(500, e.getMessage());
+        }
+        result.setResult(amount);
         return result;
     }
 }

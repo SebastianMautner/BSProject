@@ -21,10 +21,10 @@ import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
+import sys.bac.adapters.in.api.models.OrdersApiResult;
 import sys.bac.adapters.in.api.models.Link;
 
 
@@ -33,7 +33,7 @@ public class OrderWebController {
         
         @Inject
         private OrderServiceAdapter oSA;
-
+        
         @GET
         @Path("{orderId}")
         @Produces(MediaType.APPLICATION_JSON)
@@ -51,14 +51,43 @@ public class OrderWebController {
         @Produces(MediaType.APPLICATION_JSON)
         public Response getOrders(@DefaultValue("") @QueryParam("q") String query,
         @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
-        @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) { // pagination
-                List<OrderDTO> orders = oSA.getOrders(query);
-                orders = orders.stream().map(o -> addSelfLink(o, "getOrderWithId" + o.getId())).collect(Collectors.toList());
-                return Response.ok(orders)
-                .header("Link", Link.customers.getHeaderLink())
-                .header("Link", Link.devices.getHeaderLink())
-                .header("Link", new Link (Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
-                .build();
+        @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
+                size = Math.min(100, size);
+                
+                OrdersApiResult orders = oSA.getOrders(query, offset, size);
+                orders.setResult(orders.getResult().stream().map(o -> addSelfLink(o, "getOrderWithId" + o.getId())).collect(Collectors.toList()));
+                
+                if (orders.next() && orders.prev()) {
+                        return Response.ok(orders.getResult())
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
+                        .header("Link", Link.customers.getHeaderLink())
+                        .header("Link", Link.devices.getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .build();
+                        
+                } else if(orders.next()) {
+                        return Response.ok(orders.getResult())
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
+                        .header("Link", Link.customers.getHeaderLink())
+                        .header("Link", Link.devices.getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .build();
+                        
+                } else if(orders.prev()) {
+                        return Response.ok(orders.getResult())
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink())
+                        .header("Link", Link.customers.getHeaderLink())
+                        .header("Link", Link.devices.getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .build();
+                        
+                }else {
+                        return Response.ok(orders.getResult()).header("Link", Link.devices.getHeaderLink())
+                        .header("Link", Link.customers.getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref(), "createCustomer", "application/json").getHeaderLink())
+                        .build();
+                }
         }
         
         @POST
