@@ -38,6 +38,6 @@ public class Mapper {
     }
 
     public OrderResult toOrderResult(OrderJPAEntity o) {
-        return toOrderResult(o);
+        return toOrderResult(toOrder(o));
     }
 }
