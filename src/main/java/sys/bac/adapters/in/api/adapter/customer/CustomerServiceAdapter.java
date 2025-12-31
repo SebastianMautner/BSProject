@@ -18,6 +18,11 @@ import sys.bac.application.port.in.customer.GetCustomersUseCase;
 import sys.bac.application.port.in.customer.PostCustomerUseCase;
 import sys.bac.application.port.in.customer.PutCustomerUseCase;
 
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheInvalidateAll;
+import io.quarkus.cache.CacheKey;
+import io.quarkus.cache.CacheResult;
+
 @ApplicationScoped
 public class CustomerServiceAdapter {
     
@@ -38,7 +43,8 @@ public class CustomerServiceAdapter {
     
     private final Mapper mapper = new Mapper();
     
-    public CustomerDTO getCustomerById(long id) {
+    @CacheResult(cacheName = "customer-by-id")
+    public CustomerDTO getCustomerById(@CacheKey long id) {
         LongId cId = new LongId(id);
         CustomerResult customer = gCBIUC.loadCustomerById(cId);
         
@@ -52,6 +58,7 @@ public class CustomerServiceAdapter {
         }
     }
     
+    @CacheResult(cacheName = "customers-list")
     public CustomersApiResult getCustomers(String query, int offset, int size) {
         CustomersResult customers = gCUC.findCustomers(query, offset, size);
         if(customers.hasError()) {
@@ -64,6 +71,7 @@ public class CustomerServiceAdapter {
         return result;
     }
     
+    @CacheInvalidateAll(cacheName = "customers-list")
     public CustomerDTO createCustomer(CustomerDTO customer) {
         CustomerResult result = poCUC.createCustomer(customer);
         if(result.hasError()) {
@@ -72,7 +80,9 @@ public class CustomerServiceAdapter {
         return mapper.toDTO(result.getResult());
     }
     
-    public void updateCustomer(long id, CustomerDTO customer) {
+    @CacheInvalidate(cacheName = "customer-by-id")
+    @CacheInvalidateAll(cacheName = "customers-list")
+    public void updateCustomer(@CacheKey long id, CustomerDTO customer) {
         LongId cId =  new LongId(id);
         NoContentResult result = puCUC.updateCustomer(cId, customer);
         if (result.getErrorCode() == 404) {
@@ -82,7 +92,9 @@ public class CustomerServiceAdapter {
         }
     }
     
-    public void deleteCustomer(long id) {
+    @CacheInvalidate(cacheName = "customer-by-id")
+    @CacheInvalidateAll(cacheName = "customers-list")
+    public void deleteCustomer(@CacheKey long id) {
         LongId cId = new LongId(id);
         NoContentResult result = dCUC.deleteCustomer(cId);
         if (result.getErrorCode() == 404) {

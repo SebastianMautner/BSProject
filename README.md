@@ -27,19 +27,18 @@ proj (Main folder of the project, including files such as pom.xml)
 
 TODO:
 Docker?
-Caching
 Querying
 other use cases
 ReadMe
 Video
 Tests
+Ist Caching einsehbar?
 
 Open Questions:
 What the fuck does he mean with the whole docker bullshit?
 Is XML really necessary?
 is using localhost for addresses fine, or does it need to be a seperate thing?
 Video Contents
-
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
 # code-with-quarkus

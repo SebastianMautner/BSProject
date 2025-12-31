@@ -18,6 +18,11 @@ import sys.bac.application.port.in.device.GetDevicesUseCase;
 import sys.bac.application.port.in.device.PostDeviceUseCase;
 import sys.bac.application.port.in.device.PutDeviceUseCase;
 
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheInvalidateAll;
+import io.quarkus.cache.CacheKey;
+import io.quarkus.cache.CacheResult;
+
 @ApplicationScoped
 public class DeviceServiceAdapter {
 
@@ -29,6 +34,7 @@ public class DeviceServiceAdapter {
     @Inject private PutDeviceUseCase putDevice;
     @Inject private DeleteDeviceUseCase deleteDevice;
 
+    @CacheResult(cacheName = "devices-list")
     public DevicesApiResult getDevices(String query, int offset, int size) {
         DevicesResult devices = getDevices.findDevices(query, offset, size);
         if(devices.hasError()) {
@@ -41,7 +47,8 @@ public class DeviceServiceAdapter {
         return result;
     }
 
-    public DeviceDTO getDeviceById(long id) {
+    @CacheResult(cacheName = "device-by-id")
+    public DeviceDTO getDeviceById(@CacheKey long id) {
         DeviceResult res = getDeviceById.loadDeviceById(new LongId(id));
         if (res.isEmpty()) {
             throw new NotFoundException();
@@ -53,6 +60,7 @@ public class DeviceServiceAdapter {
         }
     }
 
+    @CacheInvalidateAll(cacheName = "devices-list")
     public DeviceDTO createDevice(DeviceDTO dto) {
         DeviceResult res = postDevice.createDevice(dto);
         if (res.hasError()) {
@@ -61,7 +69,9 @@ public class DeviceServiceAdapter {
         return mapper.toDTO(res.getResult());
     }
 
-    public void updateDevice(long id, DeviceDTO dto) {
+    @CacheInvalidate(cacheName = "device-by-id")
+    @CacheInvalidateAll(cacheName = "devices-list")
+    public void updateDevice(@CacheKey long id, DeviceDTO dto) {
         NoContentResult result = putDevice.updateDevice(new LongId(id), dto);
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();
@@ -70,7 +80,9 @@ public class DeviceServiceAdapter {
         }
     }
 
-    public void deleteDevice(long id) {
+    @CacheInvalidate(cacheName = "device-by-id")
+    @CacheInvalidateAll(cacheName = "devices-list")
+    public void deleteDevice(@CacheKey long id) {
         NoContentResult result = deleteDevice.deleteDevice(new LongId(id));
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();
