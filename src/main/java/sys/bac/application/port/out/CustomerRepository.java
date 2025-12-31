@@ -19,5 +19,5 @@ public interface CustomerRepository {
 
     NoContentResult update(LongId id, Customer customer);
 
-    LongResult count();
+    LongResult count(String query);
 }

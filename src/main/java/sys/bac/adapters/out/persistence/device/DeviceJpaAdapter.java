@@ -111,7 +111,7 @@ public class DeviceJpaAdapter implements DeviceRepository {
         return result;
     }
 
-    public LongResult count() {
+    public LongResult count(String query) {
         LongResult result = new LongResult();
         long amount = -1;
         try {

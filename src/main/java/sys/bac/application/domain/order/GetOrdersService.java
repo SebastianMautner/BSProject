@@ -17,11 +17,11 @@ public class GetOrdersService implements GetOrdersUseCase {
 
     public OrdersResult findOrders(String query, int offset, int size) {
         JpaOrdersResult jpaResult = orderRepo.getAllOrders(query, offset, size);
-        LongResult totalResult = orderRepo.count();
+        LongResult totalResult = orderRepo.count(query);
         
         OrdersResult result = new OrdersResult(new Page<>(jpaResult.getResult(), offset, size, totalResult.getResult()));
         if (jpaResult.hasError() || totalResult.hasError()) {
-            result.setError(500, "InternalServerError");
+            result.setError(500, jpaResult.getMessage() + "\n" + totalResult.getMessage());
         }
         return result;
     }

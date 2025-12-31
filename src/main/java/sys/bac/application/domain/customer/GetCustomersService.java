@@ -17,11 +17,11 @@ public class GetCustomersService implements GetCustomersUseCase{
 
     public CustomersResult findCustomers(String query, int offset, int size) {
         JpaCustomersResult jpaResult = customerRepo.getAllCustomers(query, offset, size);
-        LongResult totalResult = customerRepo.count();
+        LongResult totalResult = customerRepo.count(query);
         
         CustomersResult result = new CustomersResult(new Page<>(jpaResult.getResult(), offset, size, totalResult.getResult()));
         if (jpaResult.hasError() || totalResult.hasError()) {
-            result.setError(500, "InternalServerError");
+            result.setError(500, jpaResult.getMessage() + "\n" + totalResult.getMessage());
         }
         return result;
     }
