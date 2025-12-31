@@ -55,38 +55,27 @@ public class OrderWebController {
                 
                 OrdersApiResult orders = oSA.getOrders(query, offset, size);
                 orders.setResult(orders.getResult().stream().map(o -> addSelfLink(o, "getOrderWithId" + o.getId())).collect(Collectors.toList()));
+                Response.ResponseBuilder builder = Response.ok(orders.getResult());
                 
                 if (orders.next() && orders.prev()) {
-                        return Response.ok(orders.getResult())
+                        builder = builder
                         .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
-                        .header("Link", Link.customers.getHeaderLink())
-                        .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
-                        .build();
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
                         
                 } else if(orders.next()) {
-                        return Response.ok(orders.getResult())
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink())
-                        .header("Link", Link.customers.getHeaderLink())
-                        .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
-                        .build();
+                        builder = builder
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
                         
                 } else if(orders.prev()) {
-                        return Response.ok(orders.getResult())
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                        .header("Link", Link.customers.getHeaderLink())
-                        .header("Link", Link.devices.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
-                        .build();
-                        
-                }else {
-                        return Response.ok(orders.getResult()).header("Link", Link.devices.getHeaderLink())
-                        .header("Link", Link.customers.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
-                        .build();
+                        builder = builder
+                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
                 }
+                
+                return builder
+                .header("Link", Link.devices.getHeaderLink())
+                .header("Link", Link.customers.getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
+                .build();
         }
         
         @POST
