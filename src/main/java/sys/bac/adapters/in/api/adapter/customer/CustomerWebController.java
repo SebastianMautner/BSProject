@@ -46,7 +46,7 @@ public class CustomerWebController {
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCustomers(@DefaultValue("") @QueryParam("q") String query,
+    public Response getCustomers(@DefaultValue("") @QueryParam("query") String query,
     @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
     @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
         size = Math.min(size, 100);

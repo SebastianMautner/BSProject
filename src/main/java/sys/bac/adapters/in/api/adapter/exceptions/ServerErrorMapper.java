@@ -21,7 +21,7 @@ public class ServerErrorMapper implements ExceptionMapper<InternalServerErrorExc
     public Response toResponse(InternalServerErrorException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.serverError().header("Link", Link.customers.getHeaderLink()).build();
+            return Response.serverError().entity(ex.getMessage()).header("Link", Link.customers.getHeaderLink()).build();
         } else if (resourceClass == OrderWebController.class) {
             return Response.serverError().header("Link", Link.orders.getHeaderLink()).build();
         }

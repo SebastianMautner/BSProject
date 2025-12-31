@@ -18,7 +18,7 @@ public class GetDevicesService implements GetDevicesUseCase {
     @Override
     public DevicesResult findDevices(String query, int offset, int size) {
         JpaDevicesResult jpaResult = deviceRepo.getAllDevices(query, offset, size);
-        LongResult totalResult = deviceRepo.count();
+        LongResult totalResult = deviceRepo.count(query);
         
         DevicesResult result = new DevicesResult(new Page<>(jpaResult.getResult(), offset, size, totalResult.getResult()));
         if (jpaResult.hasError() || totalResult.hasError()) {

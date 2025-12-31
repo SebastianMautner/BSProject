@@ -19,5 +19,5 @@ public interface OrderRepository {
 
     NoContentResult update(LongId id, Order order);
 
-    LongResult count();
+    LongResult count(String query);
 }

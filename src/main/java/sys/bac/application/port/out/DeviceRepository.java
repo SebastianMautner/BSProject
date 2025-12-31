@@ -19,6 +19,6 @@ public interface DeviceRepository {
 
     NoContentResult update(LongId id, Device device);
 
-    LongResult count();
+    LongResult count(String query);
 }
 
