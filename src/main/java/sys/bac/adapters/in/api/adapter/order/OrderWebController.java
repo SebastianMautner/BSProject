@@ -48,7 +48,7 @@ public class OrderWebController {
         
         @GET
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getOrders(@DefaultValue("") @QueryParam("q") String query,
+        public Response getOrders(@DefaultValue("") @QueryParam("query") String query,
         @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
         @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
                 size = Math.min(100, size);
@@ -89,7 +89,7 @@ public class OrderWebController {
                         builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink());
                 }
                 return builder
-                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink())
                 .header("Link", Link.devices.getHeaderLink())
                 .header("Link", Link.customers.getHeaderLink())
                 .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())

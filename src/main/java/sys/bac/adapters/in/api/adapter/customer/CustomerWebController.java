@@ -86,7 +86,6 @@ public class CustomerWebController {
             builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink());
         }
         
-        
         return builder
         .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink())
         .header("Link", Link.orders.getHeaderLink())
