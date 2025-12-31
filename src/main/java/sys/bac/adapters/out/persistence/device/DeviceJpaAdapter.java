@@ -9,7 +9,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.device.Device;
@@ -30,13 +34,30 @@ public class DeviceJpaAdapter implements DeviceRepository {
     @Override
     public JpaDevicesResult getAllDevices(String query, int offset, int size) {
         List<Device> list = new ArrayList<>();
-        JpaDevicesResult result = new JpaDevicesResult();
-        
+        JpaDevicesResult result =  new JpaDevicesResult();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<DeviceJPAEntity> cQ = cB.createQuery(DeviceJPAEntity.class);
             Root<DeviceJPAEntity> root = cQ.from(DeviceJPAEntity.class);
-            cQ.select(root);
+            if (!query.isBlank()) {
+                List<Predicate> predicates = new ArrayList<>();
+                EntityType<DeviceJPAEntity> entityType = eM.getMetamodel().entity(DeviceJPAEntity.class);
+                for (Attribute<? super DeviceJPAEntity, ?> attr : entityType.getAttributes()) {
+                    
+                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
+                        Expression<String> expr;
+                        if (attr.getJavaType().equals(String.class)) {
+                            expr = cB.lower(root.get(attr.getName()));
+                        } else {
+                            expr = cB.lower(cB.toString(root.get(attr.getName())));
+                        }
+                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
+                    }
+                }
+                if(!predicates.isEmpty()) {
+                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
+                }
+            }
             
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
@@ -45,7 +66,8 @@ public class DeviceJpaAdapter implements DeviceRepository {
             .stream()
             .map(mapper::toDevice)
             .collect(Collectors.toList());
-        } catch (Exception e) {
+        }
+        catch ( Exception e) {
             result.setError(500, e.getMessage());
         }
         result.setResult(list);
@@ -118,6 +140,26 @@ public class DeviceJpaAdapter implements DeviceRepository {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
             Root<DeviceJPAEntity> root = cQ.from(DeviceJPAEntity.class);
+            
+            if (!query.isBlank()) {
+                List<Predicate> predicates = new ArrayList<>();
+                EntityType<DeviceJPAEntity> entityType = eM.getMetamodel().entity(DeviceJPAEntity.class);
+                for (Attribute<? super DeviceJPAEntity, ?> attr : entityType.getAttributes()) {
+                    
+                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
+                        Expression<String> expr;
+                        if (attr.getJavaType().equals(String.class)) {
+                            expr = cB.lower(root.get(attr.getName()));
+                        } else {
+                            expr = cB.lower(cB.toString(root.get(attr.getName())));
+                        }
+                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
+                    }
+                }
+                if(!predicates.isEmpty()) {
+                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
+                }
+            }
             cQ.select(cB.count(root));
             amount = eM.createQuery(cQ).getSingleResult();
         }

@@ -9,7 +9,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
@@ -29,13 +33,30 @@ public class OrderJpaAdapter implements OrderRepository {
     
     public JpaOrdersResult getAllOrders(String query, int offset, int size) {
         List<Order> list = new ArrayList<>();
-        JpaOrdersResult result = new JpaOrdersResult();
-
+        JpaOrdersResult result =  new JpaOrdersResult();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<OrderJPAEntity> cQ = cB.createQuery(OrderJPAEntity.class);
             Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
-            cQ.select(root);
+            if (!query.isBlank()) {
+                List<Predicate> predicates = new ArrayList<>();
+                EntityType<OrderJPAEntity> entityType = eM.getMetamodel().entity(OrderJPAEntity.class);
+                for (Attribute<? super OrderJPAEntity, ?> attr : entityType.getAttributes()) {
+                    
+                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
+                        Expression<String> expr;
+                        if (attr.getJavaType().equals(String.class)) {
+                            expr = cB.lower(root.get(attr.getName()));
+                        } else {
+                            expr = cB.lower(cB.toString(root.get(attr.getName())));
+                        }
+                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
+                    }
+                }
+                if(!predicates.isEmpty()) {
+                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
+                }
+            }
             
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
@@ -44,7 +65,8 @@ public class OrderJpaAdapter implements OrderRepository {
             .stream()
             .map(mapper::toOrder)
             .collect(Collectors.toList());
-        } catch (Exception e) {
+        }
+        catch ( Exception e) {
             result.setError(500, e.getMessage());
         }
         result.setResult(list);
@@ -120,6 +142,26 @@ public class OrderJpaAdapter implements OrderRepository {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
             Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
+            
+            if (!query.isBlank()) {
+                List<Predicate> predicates = new ArrayList<>();
+                EntityType<OrderJPAEntity> entityType = eM.getMetamodel().entity(OrderJPAEntity.class);
+                for (Attribute<? super OrderJPAEntity, ?> attr : entityType.getAttributes()) {
+                    
+                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
+                        Expression<String> expr;
+                        if (attr.getJavaType().equals(String.class)) {
+                            expr = cB.lower(root.get(attr.getName()));
+                        } else {
+                            expr = cB.lower(cB.toString(root.get(attr.getName())));
+                        }
+                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
+                    }
+                }
+                if(!predicates.isEmpty()) {
+                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
+                }
+            }
             cQ.select(cB.count(root));
             amount = eM.createQuery(cQ).getSingleResult();
         }
