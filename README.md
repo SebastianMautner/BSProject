@@ -26,7 +26,6 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-Validation
 Docker?
 Caching
 Querying
@@ -39,6 +38,7 @@ Open Questions:
 What the fuck does he mean with the whole docker bullshit?
 Is XML really necessary?
 is using localhost for addresses fine, or does it need to be a seperate thing?
+Video Contents
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
