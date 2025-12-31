@@ -64,6 +64,7 @@ public class CustomerServiceAdapter {
     
     @CacheResult(cacheName = "customers-list")
     public CustomersApiResult getCustomers(String query, int offset, int size) {
+        LOG.infof("CACHE-TEST: getCustomers EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
         CustomersResult customers = gCUC.findCustomers(query, offset, size);
         if(customers.hasError()) {
             throw new InternalServerErrorException(customers.getMessage());
@@ -77,6 +78,7 @@ public class CustomerServiceAdapter {
     
     @CacheInvalidateAll(cacheName = "customers-list")
     public CustomerDTO createCustomer(CustomerDTO customer) {
+        LOG.infof("CREATE customer → cache invalidated");
         CustomerResult result = poCUC.createCustomer(customer);
         if(result.hasError()) {
             throw new InternalServerErrorException(result.getMessage());
@@ -87,6 +89,7 @@ public class CustomerServiceAdapter {
     @CacheInvalidate(cacheName = "customer-by-id")
     @CacheInvalidateAll(cacheName = "customers-list")
     public void updateCustomer(@CacheKey long id, CustomerDTO customer) {
+        LOG.infof("UPDATE customer id=%d → cache invalidated", id);
         LongId cId =  new LongId(id);
         NoContentResult result = puCUC.updateCustomer(cId, customer);
         if (result.getErrorCode() == 404) {
@@ -99,6 +102,7 @@ public class CustomerServiceAdapter {
     @CacheInvalidate(cacheName = "customer-by-id")
     @CacheInvalidateAll(cacheName = "customers-list")
     public void deleteCustomer(@CacheKey long id) {
+        LOG.infof("DELETE customer id=%d → cache invalidated", id);
         LongId cId = new LongId(id);
         NoContentResult result = dCUC.deleteCustomer(cId);
         if (result.getErrorCode() == 404) {
