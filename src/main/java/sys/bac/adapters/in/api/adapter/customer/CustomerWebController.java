@@ -54,22 +54,41 @@ public class CustomerWebController {
         CustomersApiResult customers = cSA.getCustomers(query, offset, size);
         customers.setResult(customers.getResult().stream().map(c -> addSelfLink(c, "getCustomerWithId" + c.getId())).collect(Collectors.toList()));
         Response.ResponseBuilder builder = Response.ok(customers.getResult());
-        
-        if (customers.next() && customers.prev()) {
-            builder = builder
-            .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
-            
-        } else if(customers.next()) {
-            builder = builder
-            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
-            
-        } else if(customers.prev()) {
-            builder = builder
-            .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+        if(query.isBlank()) {
+            if (customers.next() && customers.prev()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                
+            } else if(customers.next()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                
+            } else if(customers.prev()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+            }
+        }
+        else {
+            if (customers.next() && customers.prev()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                
+            } else if(customers.next()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                
+            } else if(customers.prev()) {
+                builder = builder
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink());
+            }
+            builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink());
         }
         
+        
         return builder
+        .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink())
         .header("Link", Link.orders.getHeaderLink())
         .header("Link", Link.devices.getHeaderLink())
         .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
