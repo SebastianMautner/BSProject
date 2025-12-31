@@ -22,7 +22,7 @@ public class GetDevicesService implements GetDevicesUseCase {
         
         DevicesResult result = new DevicesResult(new Page<>(jpaResult.getResult(), offset, size, totalResult.getResult()));
         if (jpaResult.hasError() || totalResult.hasError()) {
-            result.setError(500, "InternalServerError");
+            result.setError(500, jpaResult.getMessage() + "\n" + totalResult.getMessage());
         }
         return result;
     }
