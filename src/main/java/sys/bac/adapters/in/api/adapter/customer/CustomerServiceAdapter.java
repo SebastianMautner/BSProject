@@ -22,9 +22,12 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class CustomerServiceAdapter {
+
+    private static final Logger LOG = Logger.getLogger(CustomerServiceAdapter.class);
     
     @Inject
     private GetCustomerByIdUseCase gCBIUC;
@@ -45,6 +48,7 @@ public class CustomerServiceAdapter {
     
     @CacheResult(cacheName = "customer-by-id")
     public CustomerDTO getCustomerById(@CacheKey long id) {
+        LOG.infof("CACHE-TEST: getCustomerById EXECUTED for id=%d", id);
         LongId cId = new LongId(id);
         CustomerResult customer = gCBIUC.loadCustomerById(cId);
         
