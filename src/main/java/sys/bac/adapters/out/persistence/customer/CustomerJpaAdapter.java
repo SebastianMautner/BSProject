@@ -52,7 +52,6 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
-            System.out.println("Query = '" + query + "'");
             if (!query.isBlank()) {
                 List<Predicate> predicates = new ArrayList<>();
                 EntityType<CustomerJPAEntity> entityType = eM.getMetamodel().entity(CustomerJPAEntity.class);

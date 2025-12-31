@@ -23,7 +23,7 @@ public class DeviceWebController {
     @GET
     @Path("{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDeviceById(@PathParam("deviceId") long id) {
+    public Response getDeviceById(@Positive @PathParam("deviceId") long id) {
         DeviceDTO device = dSA.getDeviceById(id);
         device = addSelfLink(device, "getDeviceWithId" + device.getId());
         

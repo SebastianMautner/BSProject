@@ -36,7 +36,7 @@ public class OrderWebController {
         @GET
         @Path("{orderId}")
         @Produces(MediaType.APPLICATION_JSON)
-        public Response getOrderById(@PathParam("orderId") long id) { 
+        public Response getOrderById(@Positive @PathParam("orderId") long id) { 
                 OrderDTO order = oSA.getOrderById(id);
                 order = addSelfLink(order, "getOrderWithId" + order.getId());
                 return Response.ok(order)
@@ -57,21 +57,39 @@ public class OrderWebController {
                 orders.setResult(orders.getResult().stream().map(o -> addSelfLink(o, "getOrderWithId" + o.getId())).collect(Collectors.toList()));
                 Response.ResponseBuilder builder = Response.ok(orders.getResult());
                 
-                if (orders.next() && orders.prev()) {
-                        builder = builder
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
-                        
-                } else if(orders.next()) {
-                        builder = builder
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
-                        
-                } else if(orders.prev()) {
-                        builder = builder
-                        .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+                if(query.isBlank()) {
+                        if (orders.next() && orders.prev()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                                
+                        } else if(orders.next()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                                
+                        } else if(orders.prev()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+                        }
                 }
-                
+                else {
+                        if (orders.next() && orders.prev()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink())
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                                
+                        } else if(orders.next()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                                
+                        } else if(orders.prev()) {
+                                builder = builder
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink());
+                        }
+                        builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink());
+                }
                 return builder
+                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink())
                 .header("Link", Link.devices.getHeaderLink())
                 .header("Link", Link.customers.getHeaderLink())
                 .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
@@ -99,7 +117,7 @@ public class OrderWebController {
         
         @DELETE
         @Path("{id}")
-        public Response deleteOrder(@PathParam("id") long id) {
+        public Response deleteOrder(@Positive @PathParam("id") long id) {
                 oSA.deleteOrder(id);
                 return Response.noContent()
                 .header("Link", Link.orders.getHeaderLink())

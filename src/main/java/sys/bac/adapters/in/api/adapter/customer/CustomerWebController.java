@@ -35,7 +35,7 @@ public class CustomerWebController {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCustomerById(@PathParam("id")long id) { //Positive via Service Adapters
+    public Response getCustomerById( @Positive @PathParam("id")long id) {
         CustomerDTO customer = cSA.getCustomerById(id);
         customer = addSelfLink(customer, "getCustomerWithId" + customer.getId());
         return Response.ok(customer)
@@ -112,7 +112,7 @@ public class CustomerWebController {
     
     @DELETE
     @Path("{id}")
-    public Response deleteCustomer(@PathParam("id") long id) {
+    public Response deleteCustomer(@Positive @PathParam("id") long id) {
         cSA.deleteCustomer(id);
         return Response.noContent().header("Link", Link.customers.getHeaderLink()).build();
     }
