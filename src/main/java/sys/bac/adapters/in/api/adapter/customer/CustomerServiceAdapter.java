@@ -99,6 +99,7 @@ public class CustomerServiceAdapter {
     @CacheInvalidate(cacheName = "customer-by-id")
     @CacheInvalidateAll(cacheName = "customers-list")
     public void deleteCustomer(@CacheKey long id) {
+        LOG.infof("DELETE customer id=%d → cache invalidated", id);
         LongId cId = new LongId(id);
         NoContentResult result = dCUC.deleteCustomer(cId);
         if (result.getErrorCode() == 404) {

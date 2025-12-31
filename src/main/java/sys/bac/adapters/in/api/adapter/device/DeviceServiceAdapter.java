@@ -22,9 +22,12 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class DeviceServiceAdapter {
+
+    private static final Logger LOG = Logger.getLogger(DeviceServiceAdapter.class);
 
     private final Mapper mapper = new Mapper();
 
@@ -49,6 +52,7 @@ public class DeviceServiceAdapter {
 
     @CacheResult(cacheName = "device-by-id")
     public DeviceDTO getDeviceById(@CacheKey long id) {
+        LOG.infof("CACHE-TEST: getDeviceById EXECUTED for id=%d", id);
         DeviceResult res = getDeviceById.loadDeviceById(new LongId(id));
         if (res.isEmpty()) {
             throw new NotFoundException();
@@ -83,6 +87,7 @@ public class DeviceServiceAdapter {
     @CacheInvalidate(cacheName = "device-by-id")
     @CacheInvalidateAll(cacheName = "devices-list")
     public void deleteDevice(@CacheKey long id) {
+        LOG.infof("DELETE device id=%d → cache invalidated", id);
         NoContentResult result = deleteDevice.deleteDevice(new LongId(id));
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();

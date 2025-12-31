@@ -23,9 +23,12 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class OrderServiceAdapter {
+
+    private static final Logger LOG = Logger.getLogger(OrderServiceAdapter.class);
     
     @Inject
     GetOrderByIdUseCase getOrderByIdUC;
@@ -46,6 +49,7 @@ public class OrderServiceAdapter {
     
     @CacheResult(cacheName = "order-by-id")
     public OrderDTO getOrderById(@CacheKey long id) {
+        LOG.infof("CACHE-TEST: getOrderById EXECUTED for id=%d", id);
         LongId oId = new LongId(id);
         OrderResult res = getOrderByIdUC.loadOrderById(oId);
         if (res.isEmpty()) {
@@ -82,7 +86,7 @@ public class OrderServiceAdapter {
 
     @CacheInvalidate(cacheName = "order-by-id")
     @CacheInvalidateAll(cacheName = "orders-list")
-    public void updateOrder(@CacheKey long id, OrderDTO dto) {
+    public void updateOrder(@CacheKey long id, OrderDTO dto) {   
         LongId oId = new LongId(id);
         NoContentResult result = putOrderUC.updateOrder(oId, dto);
         if (result.getErrorCode() == 404) {
@@ -95,6 +99,7 @@ public class OrderServiceAdapter {
     @CacheInvalidate(cacheName = "order-by-id")
     @CacheInvalidateAll(cacheName = "orders-list")
     public void deleteOrder(@CacheKey long id) {
+        LOG.infof("DELETE order id=%d → cache invalidated", id);
         LongId oId = new LongId(id);
         NoContentResult result= deleteOrderUC.deleteOrder(oId);
         if (result.getErrorCode() == 404) {
