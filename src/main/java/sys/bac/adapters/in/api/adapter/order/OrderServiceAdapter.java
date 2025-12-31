@@ -64,6 +64,7 @@ public class OrderServiceAdapter {
 
     @CacheResult(cacheName = "orders-list")
     public OrdersApiResult getOrders(String query, int offset, int size) {
+        LOG.infof("CACHE-TEST: getOrders EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
         OrdersResult orders = getOrdersUC.findOrders(query, offset, size);
         if(orders.hasError()) {
             throw new InternalServerErrorException(orders.getMessage());
@@ -77,6 +78,7 @@ public class OrderServiceAdapter {
 
     @CacheInvalidateAll(cacheName = "orders-list")
     public OrderDTO createOrder(OrderDTO dto) {
+        LOG.infof("CREATE order → cache invalidated");
         OrderResult res = postOrderUC.createOrder(dto);
         if (res.hasError()) {
             throw new IllegalArgumentException(res.getMessage());
@@ -86,7 +88,8 @@ public class OrderServiceAdapter {
 
     @CacheInvalidate(cacheName = "order-by-id")
     @CacheInvalidateAll(cacheName = "orders-list")
-    public void updateOrder(@CacheKey long id, OrderDTO dto) {   
+    public void updateOrder(@CacheKey long id, OrderDTO dto) {  
+        LOG.infof("UPDATE order id=%d → cache invalidated", id);
         LongId oId = new LongId(id);
         NoContentResult result = putOrderUC.updateOrder(oId, dto);
         if (result.getErrorCode() == 404) {
