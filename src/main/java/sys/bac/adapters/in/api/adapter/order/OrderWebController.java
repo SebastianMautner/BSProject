@@ -13,7 +13,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
