@@ -128,4 +128,20 @@ public class OrderWebController {
                 order.setSelf(new Link("http://localhost:8080/" + Link.orders.getHref() + "/" + order.getId(),rel,"application/json"));
                 return order;
         }
+        
+        @DELETE
+        public void ErrorDelete() {
+                throw new BadRequestException();
+        }
+        
+        @PUT
+        public void ErrorUpdate() {
+                throw new BadRequestException();
+        }
+        
+        @POST
+        @Path("{id}")
+        public void ErrorPost() {
+                throw new BadRequestException();
+        }
 }

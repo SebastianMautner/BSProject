@@ -21,4 +21,26 @@ public class DispatcherService {
         .header("Link", Link.devices.getHeaderLink())
         .build();
     }
+
+    @DELETE
+    public void ErrorDelete() {
+        throw new BadRequestException();
+    }
+    
+    @PUT
+    public void ErrorUpdate() {
+        throw new BadRequestException();
+    }
+    
+    @POST
+    @Path("{id}")
+    public void ErrorPost() {
+        throw new BadRequestException();
+    }
+
+    @GET
+    @Path("id")
+    public void ErrorGet() {
+        throw new BadRequestException();
+    }
 }

@@ -116,5 +116,21 @@ public class DeviceWebController {
         dto.setSelf(new Link( "http://localhost:8080/" + Link.devices.getHref() + "/" + dto.getId(), rel, "application/json"));
         return dto;
     }
+
+    @DELETE
+    public void ErrorDelete() {
+        throw new BadRequestException();
+    }
+    
+    @PUT
+    public void ErrorUpdate() {
+        throw new BadRequestException();
+    }
+    
+    @POST
+    @Path("{id}")
+    public void ErrorPost() {
+        throw new BadRequestException();
+    }
 }
 
