@@ -13,6 +13,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 
 import jakarta.ws.rs.core.Response;
@@ -119,5 +120,21 @@ public class CustomerWebController {
     private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
         customer.setSelf(new Link("http://localhost:8080/" + Link.customers.getHref() + "/" + customer.getId(), rel, "application/json"));
         return customer;
+    }
+    
+    @DELETE
+    public void ErrorDelete() {
+        throw new BadRequestException();
+    }
+    
+    @PUT
+    public void ErrorUpdate() {
+        throw new BadRequestException();
+    }
+    
+    @POST
+    @Path("{id}")
+    public void ErrorPost() {
+        throw new BadRequestException();
     }
 }

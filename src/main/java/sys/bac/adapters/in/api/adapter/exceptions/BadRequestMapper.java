@@ -35,7 +35,7 @@ public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
         }
         else {
             return Response.status(400)
-            .header("How", "YouFailedHypermedia")
+            .header("HOW", "YouFailedHypermedia")
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         
