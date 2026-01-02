@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.net.URI;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ public class DeviceWebController {
 
     @Context
     private UriInfo uriInfo;
-    private URI uri = uriInfo.getAbsolutePath();
     
     @Context
     Request request;
@@ -71,14 +69,14 @@ public class DeviceWebController {
             return precond
                 .cacheControl(defaultGetCacheControl())
                 .tag(etag)
-                .header("Link", Link.devices.getHeaderLink(uri))
+                .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
                 .build();
         }
 
         return Response.ok(device)
-        .header("Link", Link.devices.getHeaderLink(uri))
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink(uri))
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink(uri))
+        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
@@ -95,39 +93,39 @@ public class DeviceWebController {
         if(query.isBlank()) {
             if (devices.next() && devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(devices.next()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
             }
         }
         else {
             if (devices.next() && devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(devices.next()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
             }
-            builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
+            builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
         }
         return builder
-        .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink(uri))
-        .header("Link", Link.customers.getHeaderLink(uri))
-        .header("Link", Link.orders.getHeaderLink(uri))
-        .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink(uri))
+        .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
@@ -137,7 +135,7 @@ public class DeviceWebController {
         DeviceDTO result = dSA.createDevice(device);
         
         return Response.status(Response.Status.CREATED)
-        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uri))
+        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
@@ -147,7 +145,7 @@ public class DeviceWebController {
     public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device) {
         dSA.updateDevice(id, device);
         return Response.noContent()
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uri))
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
@@ -156,12 +154,12 @@ public class DeviceWebController {
     public Response deleteDevice(@Positive @PathParam("id") long id) {
         dSA.deleteDevice(id);
         return Response.noContent()
-        .header("Link", Link.devices.getHeaderLink(uri))
+        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
     private DeviceDTO addSelfLink(DeviceDTO dto, String rel) {
-        dto.setSelf(new Link(uriInfo.getAbsolutePath().toString() + Link.customers.getHref() + "/" + dto.getId(), rel, "application/json"));
+        dto.setSelf(new Link(uriInfo.getBaseUri().toString() + Link.customers.getHref() + "/" + dto.getId(), rel, "application/json"));
         return dto;
     }
 
