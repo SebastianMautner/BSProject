@@ -28,7 +28,7 @@ proj (Main folder of the project, including files such as pom.xml)
 TODO:
 1:n (evtl. Verlinkung [wenn Lust und Zeit])
 HTTP Caching    WIP
-other use cases
+use cases
 ip-address
 ReadMe
 Video
@@ -41,7 +41,8 @@ Get all devices/orders of a customer with a certain name(Get device ?surname={su
 Finalize order status (Put order /{id}?status={Completed}&final_cost) Patch? maybe in body?
 DELETE canceled orders(DELETE orders?status=Canceled)
 Get all devices from a certain brand (Get devices?brand={Brand})
-
+Get orders with device serial number
+Get all completed orders
 
 Open Questions:
 
