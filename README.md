@@ -26,7 +26,6 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
-1:n
 other use cases
 ReadMe
 Video
@@ -34,6 +33,7 @@ Tests
 Documentation (learn LaTeX)
 
 Use Cases:
+
 Get all devices/orders of a customer with a certain name(Get device ?surname={surname}&?name={name})
 Finalize order status (Put order /{id}?status={Completed}&final_cost) Patch? maybe in body?
 DELETE canceled orders(DELETE orders?status=Canceled)
