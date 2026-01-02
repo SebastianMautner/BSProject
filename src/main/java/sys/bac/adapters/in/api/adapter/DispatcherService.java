@@ -15,14 +15,14 @@ import sys.bac.adapters.in.api.models.Link;
 public class DispatcherService {
 
     @Context
-    UriInfo uriInfo;
-    
+    private UriInfo uriInfo;
+
     @GET
     public Response getPaths() {
         return Response.ok()
-        .header("Link", Link.customers.getHeaderLink())
-        .header("Link", Link.orders.getHeaderLink())
-        .header("Link", Link.devices.getHeaderLink())
+        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
 

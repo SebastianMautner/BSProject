@@ -4,6 +4,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import sys.bac.adapters.in.api.adapter.DispatcherService;
@@ -17,26 +18,28 @@ public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
     
     @Context
     private ResourceInfo resource;
+
+    @Context private UriInfo uriInfo;
     
     public Response toResponse(BadRequestException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.customers.getHeaderLink()).build();
+            return Response.status(400, "Request is not valid for this location").header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.orders.getHeaderLink()).build();
+            return Response.status(400, "Request is not valid for this location").header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DeviceWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.devices.getHeaderLink()).build();
+            return Response.status(400, "Request is not valid for this location").header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DispatcherService.class) {
             return Response.status(400, "Request is not valid for this location")
-            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else {
             return Response.status(400)
             .header("HOW", "YouFailedHypermedia")
-            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
+            .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         
     }

@@ -1,7 +1,5 @@
 package sys.bac.adapters.in.api.models;
 
-import java.net.URI;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Link {
@@ -25,8 +23,8 @@ public class Link {
         return href;
     }
     
-    private String getHeaderHref(URI uri) {
-        return uri.toString() + href;
+    private String getHeaderHref(String uri) {
+        return uri + href;
     }
     
     public void setHref(String href) {
@@ -49,11 +47,11 @@ public class Link {
         this.type = type;
     }
     @JsonIgnore
-    public String getHeaderLink(URI uri) {
+    public String getHeaderLink(String uri) {
         return "<" + getHeaderHref(uri) + ">;rel=\"" + getRel() + "\";type=\"" + getType() + "\"";
     }
     
-    public String toString(URI uri) {
+    public String toString(String uri) {
         return "Link {href=" + getHeaderHref(uri) + "; rel=\"" + getRel() + "\"; type=\"" + getType() + "\"}";
     }
 }

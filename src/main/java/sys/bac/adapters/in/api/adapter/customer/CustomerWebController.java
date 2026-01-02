@@ -20,12 +20,11 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.CacheControl;;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.inject.Inject;
 
-import java.net.URI;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
@@ -38,14 +37,13 @@ public class CustomerWebController {
     
     @Inject
     private  CustomerServiceAdapter cSA;
-
+    
     @Context
     Request request;
-
+    
     @Context
     private UriInfo uriInfo;
-    private URI uri = uriInfo.getAbsolutePath();
-
+    
     private CacheControl defaultGetCacheControl() {
         CacheControl cc = new CacheControl();
         cc.setPrivate(true);
@@ -53,15 +51,15 @@ public class CustomerWebController {
         cc.setMustRevalidate(true); 
         return cc;
     }
-
-
+    
+    
     private CacheControl noStore() {
         CacheControl cc = new CacheControl();
         cc.setNoStore(true);
         cc.setNoCache(true);
         return cc;
     }
-
+    
     private EntityTag etagOf(Object... parts) {
         String value = Integer.toHexString(Objects.hash(parts));
         return new EntityTag(value, true);
@@ -73,23 +71,23 @@ public class CustomerWebController {
     public Response getCustomerById( @Positive @PathParam("id")long id) {
         CustomerDTO customer = cSA.getCustomerById(id);
         customer = addSelfLink(customer, "getCustomerWithId" + customer.getId());
-
+        
         EntityTag etag = etagOf(customer);
-
+        
         Response.ResponseBuilder precond = request.evaluatePreconditions(etag);
         if (precond != null) {
             return precond
-                .cacheControl(defaultGetCacheControl())
-                .tag(etag)
-                .header("Link", Link.devices.getHeaderLink(uri))
-                .build();
-        }
-        return Response.ok(customer)
             .cacheControl(defaultGetCacheControl())
             .tag(etag)
-            .header("Link", Link.customers.getHeaderLink(uri))
-            .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink(uri))
-            .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink(uri)).build();
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .build();
+        }
+        return Response.ok(customer)
+        .cacheControl(defaultGetCacheControl())
+        .tag(etag)
+        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
     }
     
     @GET
@@ -105,40 +103,40 @@ public class CustomerWebController {
         if(query.isBlank()) {
             if (customers.next() && customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(customers.next()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
             }
         }
         else {
             if (customers.next() && customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(customers.next()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 
             } else if(customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
             }
-            builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
+            builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
         }
         
         return builder
-        .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink(uri))
-        .header("Link", Link.orders.getHeaderLink(uri))
-        .header("Link", Link.devices.getHeaderLink(uri))
-        .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink(uri))
+        .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
     
@@ -148,7 +146,7 @@ public class CustomerWebController {
         CustomerDTO result = cSA.createCustomer(customer);
         return Response.status(Response.Status.CREATED)
         .cacheControl(noStore())
-        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink(uri))).build();
+        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
     }
     
     @PUT
@@ -158,7 +156,7 @@ public class CustomerWebController {
         cSA.updateCustomer(id, customer);
         return Response.noContent()
         .cacheControl(noStore())
-        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uri))).build();
+        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
     }
     
     @DELETE
@@ -167,11 +165,11 @@ public class CustomerWebController {
         cSA.deleteCustomer(id);
         return Response.noContent()
         .cacheControl(noStore())
-        .header("Link", Link.customers.getHeaderLink(uri)).build();
+        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
     }
     
     private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
-        customer.setSelf(new Link(uriInfo.getAbsolutePath().toString() + "/" + customer.getId(), rel, "application/json"));
+        customer.setSelf(new Link(uriInfo.getBaseUri().toString().toString() + "/" + customer.getId(), rel, "application/json"));
         return customer;
     }
     

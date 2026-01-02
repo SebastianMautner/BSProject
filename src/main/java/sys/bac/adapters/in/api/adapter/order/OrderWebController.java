@@ -23,7 +23,6 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.inject.Inject;
 
-import java.net.URI;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
@@ -65,7 +64,6 @@ public class OrderWebController {
         
         @Context
         private UriInfo uriInfo;
-        private URI uri = uriInfo.getAbsolutePath();
         
         @GET
         @Path("{orderId}")
@@ -81,15 +79,15 @@ public class OrderWebController {
                 return precond
                         .cacheControl(defaultGetCacheControl())
                         .tag(etag)
-                        .header("Link", Link.devices.getHeaderLink(uri))
+                        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
                         .build();
                 }
                 return Response.ok(order)
                         .cacheControl(defaultGetCacheControl())
                         .tag(etag)
-                        .header("Link", Link.orders.getHeaderLink(uri))
-                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uri))
-                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uri))
+                        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                         .build();
         }
         
@@ -107,39 +105,39 @@ public class OrderWebController {
                 if(query.isBlank()) {
                         if (orders.next() && orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                                 
                         } else if(orders.next()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                                 
                         } else if(orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                         }
                 }
                 else {
                         if (orders.next() && orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                                 
                         } else if(orders.next()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                                 
                         } else if(orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                         }
-                        builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
+                        builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 }
                 return builder
-                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink(uri))
-                .header("Link", Link.devices.getHeaderLink(uri))
-                .header("Link", Link.customers.getHeaderLink(uri))
-                .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                 .build();
         }
         
@@ -151,7 +149,7 @@ public class OrderWebController {
                 
                 return Response.status(Response.Status.CREATED)
                 .cacheControl(noStore())
-                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink(uri))
+                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                 .build();
         }
         
@@ -162,7 +160,7 @@ public class OrderWebController {
                 oSA.updateOrder(id, order);
                 return Response.noContent()
                 .cacheControl(noStore())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uri)).build();
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         
         @DELETE
@@ -171,7 +169,7 @@ public class OrderWebController {
                 oSA.deleteOrder(id);
                 return Response.noContent()
                 .cacheControl(noStore())
-                .header("Link", Link.orders.getHeaderLink(uri))
+                .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
                 .build();
         }
         
