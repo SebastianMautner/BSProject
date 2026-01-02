@@ -135,12 +135,8 @@ public class DeviceWebController {
         DeviceDTO result = dSA.createDevice(device);
         
         return Response.status(Response.Status.CREATED)
-<<<<<<< HEAD
-        .cacheControl(noStore())
-        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uri))
-=======
         .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
->>>>>>> 95b59ba3718333909d50131fe0c4be6b10ca1bb3
+        .cacheControl(noStore())
         .build();
     }
     
@@ -150,12 +146,8 @@ public class DeviceWebController {
     public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device) {
         dSA.updateDevice(id, device);
         return Response.noContent()
-<<<<<<< HEAD
         .cacheControl(noStore())
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uri))
-=======
         .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
->>>>>>> 95b59ba3718333909d50131fe0c4be6b10ca1bb3
         .build();
     }
     
@@ -164,12 +156,8 @@ public class DeviceWebController {
     public Response deleteDevice(@Positive @PathParam("id") long id) {
         dSA.deleteDevice(id);
         return Response.noContent()
-<<<<<<< HEAD
         .cacheControl(noStore())
-        .header("Link", Link.devices.getHeaderLink(uri))
-=======
         .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
->>>>>>> 95b59ba3718333909d50131fe0c4be6b10ca1bb3
         .build();
     }
     
