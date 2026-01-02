@@ -26,6 +26,7 @@ proj (Main folder of the project, including files such as pom.xml)
 └── target (the bin files (has a structure, but thats auto generated))
 
 TODO:
+1:n
 other use cases
 ReadMe
 Video
