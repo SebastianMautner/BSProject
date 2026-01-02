@@ -16,10 +16,14 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
-
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
 import jakarta.inject.Inject;
 
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
 import sys.bac.adapters.in.api.models.OrdersApiResult;
@@ -31,6 +35,32 @@ public class OrderWebController {
         
         @Inject
         private OrderServiceAdapter oSA;
+
+                
+        @Context
+        Request request;
+
+
+        private CacheControl defaultGetCacheControl() {
+                CacheControl cc = new CacheControl();
+                cc.setPrivate(true);
+                cc.setMaxAge(30);
+                cc.setMustRevalidate(true); 
+                return cc;
+        }
+
+
+        private CacheControl noStore() {
+                CacheControl cc = new CacheControl();
+                cc.setNoStore(true);
+                cc.setNoCache(true);
+                return cc;
+        }
+
+        private EntityTag etagOf(Object... parts) {
+                String value = Integer.toHexString(Objects.hash(parts));
+                return new EntityTag(value, true);
+        }
         
         @GET
         @Path("{orderId}")
@@ -38,11 +68,24 @@ public class OrderWebController {
         public Response getOrderById(@Positive @PathParam("orderId") long id) { 
                 OrderDTO order = oSA.getOrderById(id);
                 order = addSelfLink(order, "getOrderWithId" + order.getId());
+
+                EntityTag etag = etagOf(order);
+
+                Response.ResponseBuilder precond = request.evaluatePreconditions(etag);
+                if (precond != null) {
+                return precond
+                        .cacheControl(defaultGetCacheControl())
+                        .tag(etag)
+                        .header("Link", Link.devices.getHeaderLink())
+                        .build();
+                }
                 return Response.ok(order)
-                .header("Link", Link.orders.getHeaderLink())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
-                .build();
+                        .cacheControl(defaultGetCacheControl())
+                        .tag(etag)
+                        .header("Link", Link.orders.getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
+                        .build();
         }
         
         @GET
@@ -102,6 +145,7 @@ public class OrderWebController {
                 
                 
                 return Response.status(Response.Status.CREATED)
+                .cacheControl(noStore())
                 .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
                 .build();
         }
@@ -111,7 +155,9 @@ public class OrderWebController {
         @Consumes(MediaType.APPLICATION_JSON)
         public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order) {
                 oSA.updateOrder(id, order);
-                return Response.noContent().header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink()).build();
+                return Response.noContent()
+                .cacheControl(noStore())
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink()).build();
         }
         
         @DELETE
@@ -119,6 +165,7 @@ public class OrderWebController {
         public Response deleteOrder(@Positive @PathParam("id") long id) {
                 oSA.deleteOrder(id);
                 return Response.noContent()
+                .cacheControl(noStore())
                 .header("Link", Link.orders.getHeaderLink())
                 .build();
         }
