@@ -118,19 +118,19 @@ public class DeviceWebController {
     }
 
     @DELETE
-    public void ErrorDelete() {
-        throw new BadRequestException();
-    }
-    
-    @PUT
-    public void ErrorUpdate() {
-        throw new BadRequestException();
-    }
-    
-    @POST
-    @Path("{id}")
-    public void ErrorPost() {
-        throw new BadRequestException();
-    }
+        public void ErrorDelete() {
+                throw new NotAllowedException("No DELETE for path devices/");
+        }
+        
+        @PUT
+        public void ErrorUpdate() {
+                throw new NotAllowedException("No PUT for path devices/");
+        }
+        
+        @POST
+        @Path("{id}")
+        public void ErrorPost() {
+                throw new NotAllowedException("No POST for path devices/id");
+        }
 }
 

@@ -20,16 +20,16 @@ public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
     public Response toResponse(NotFoundException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(404).header("Link", Link.customers.getHeaderLink()).build();
+            return Response.status(404, "Not Found").header("Link", Link.customers.getHeaderLink()).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(404).header("Link", Link.orders.getHeaderLink()).build();
+            return Response.status(404, "Not Found").header("Link", Link.orders.getHeaderLink()).build();
         }
         else if (resourceClass == DeviceWebController.class) {
-            return Response.status(404).header("Link", Link.devices.getHeaderLink()).build();
+            return Response.status(404, "Not Found").header("Link", Link.devices.getHeaderLink()).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.status(404)
+            return Response.status(404, "Not Found (There are no resources here, what are you doing?)")
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink()).build();
         }
         else {

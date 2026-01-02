@@ -4,7 +4,7 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.GET;
-
+import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Path;
@@ -13,7 +13,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -131,17 +130,17 @@ public class OrderWebController {
         
         @DELETE
         public void ErrorDelete() {
-                throw new BadRequestException();
+                throw new NotAllowedException("No DELETE for path orders/");
         }
         
         @PUT
         public void ErrorUpdate() {
-                throw new BadRequestException();
+                throw new NotAllowedException("No PUT for path orders/");
         }
         
         @POST
         @Path("{id}")
         public void ErrorPost() {
-                throw new BadRequestException();
+                throw new NotAllowedException("No POST for path orders/id");
         }
 }

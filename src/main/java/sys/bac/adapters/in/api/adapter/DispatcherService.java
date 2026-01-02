@@ -1,8 +1,8 @@
 package sys.bac.adapters.in.api.adapter;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -28,23 +28,23 @@ public class DispatcherService {
 
     @DELETE
     public void ErrorDelete() {
-        throw new BadRequestException();
+        throw new NotAllowedException("Only Get is allowed.");
     }
     
     @PUT
     public void ErrorUpdate() {
-        throw new BadRequestException();
+        throw new NotAllowedException("Only Get is allowed.");
     }
     
     @POST
     @Path("{id}")
     public void ErrorPost() {
-        throw new BadRequestException();
+        throw new NotAllowedException("Only Get is allowed.");
     }
 
     @GET
     @Path("id")
     public void ErrorGet() {
-        throw new BadRequestException();
+        throw new NotAllowedException("Only Get is allowed.");
     }
 }
