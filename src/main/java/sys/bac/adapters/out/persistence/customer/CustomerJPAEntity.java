@@ -1,9 +1,14 @@
 package sys.bac.adapters.out.persistence.customer;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
+import sys.bac.adapters.out.persistence.device.DeviceJPAEntity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
@@ -24,6 +29,9 @@ public class CustomerJPAEntity {
     private String eMail;
 
     private String phone;
+
+    @OneToMany(mappedBy = "customer")
+    private List<DeviceJPAEntity> devices = new ArrayList<>();
 
     public CustomerJPAEntity() {
     }

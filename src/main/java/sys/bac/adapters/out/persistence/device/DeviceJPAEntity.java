@@ -1,6 +1,11 @@
 package sys.bac.adapters.out.persistence.device;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
+import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
+import sys.bac.adapters.out.persistence.order.OrderJPAEntity;
 
 @Entity
 @Table(name = "devices")
@@ -22,6 +27,14 @@ public class DeviceJPAEntity {
 
     @Column(length = 2000)
     private String notes;
+
+    @OneToMany(mappedBy = "device")
+    private List<OrderJPAEntity> orders = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customerId", referencedColumnName = "customerId",
+                insertable = false, updatable = false)
+    private CustomerJPAEntity customer;
 
     public DeviceJPAEntity() {}
 

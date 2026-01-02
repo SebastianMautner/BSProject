@@ -3,7 +3,7 @@ package sys.bac.adapters.out.persistence.order;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
-
+import sys.bac.adapters.out.persistence.device.DeviceJPAEntity;
 import sys.bac.application.domain.models.order.OrderStatus;
 
 @Entity
@@ -31,6 +31,11 @@ public class OrderJPAEntity {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deviceId", referencedColumnName = "id",
+                insertable = false, updatable = false)
+    private DeviceJPAEntity device;
 
     public OrderJPAEntity() {}
 
