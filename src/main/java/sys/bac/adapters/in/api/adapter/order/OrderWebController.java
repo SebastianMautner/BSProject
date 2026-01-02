@@ -15,10 +15,13 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
 
+import java.net.URI;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.OrderDTO;
@@ -32,6 +35,10 @@ public class OrderWebController {
         @Inject
         private OrderServiceAdapter oSA;
         
+        @Context
+        private UriInfo uriInfo;
+        private URI uri = uriInfo.getAbsolutePath();
+        
         @GET
         @Path("{orderId}")
         @Produces(MediaType.APPLICATION_JSON)
@@ -39,9 +46,9 @@ public class OrderWebController {
                 OrderDTO order = oSA.getOrderById(id);
                 order = addSelfLink(order, "getOrderWithId" + order.getId());
                 return Response.ok(order)
-                .header("Link", Link.orders.getHeaderLink())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
+                .header("Link", Link.orders.getHeaderLink(uri))
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uri))
                 .build();
         }
         
@@ -59,39 +66,39 @@ public class OrderWebController {
                 if(query.isBlank()) {
                         if (orders.next() && orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                                 
                         } else if(orders.next()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                                 
                         } else if(orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
                         }
                 }
                 else {
                         if (orders.next() && orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink())
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                                 
                         } else if(orders.next()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                                 
                         } else if(orders.prev()) {
                                 builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink());
+                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
                         }
-                        builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink());
+                        builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
                 }
                 return builder
-                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink())
-                .header("Link", Link.devices.getHeaderLink())
-                .header("Link", Link.customers.getHeaderLink())
-                .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink())
+                .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink(uri))
+                .header("Link", Link.devices.getHeaderLink(uri))
+                .header("Link", Link.customers.getHeaderLink(uri))
+                .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink(uri))
                 .build();
         }
         
@@ -102,7 +109,7 @@ public class OrderWebController {
                 
                 
                 return Response.status(Response.Status.CREATED)
-                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
+                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink(uri))
                 .build();
         }
         
@@ -111,7 +118,7 @@ public class OrderWebController {
         @Consumes(MediaType.APPLICATION_JSON)
         public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order) {
                 oSA.updateOrder(id, order);
-                return Response.noContent().header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink()).build();
+                return Response.noContent().header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uri)).build();
         }
         
         @DELETE
@@ -119,12 +126,12 @@ public class OrderWebController {
         public Response deleteOrder(@Positive @PathParam("id") long id) {
                 oSA.deleteOrder(id);
                 return Response.noContent()
-                .header("Link", Link.orders.getHeaderLink())
+                .header("Link", Link.orders.getHeaderLink(uri))
                 .build();
         }
         
         private OrderDTO addSelfLink(OrderDTO order, String rel) {
-                order.setSelf(new Link("http://localhost:8080/" + Link.orders.getHref() + "/" + order.getId(),rel,"application/json"));
+               order.setSelf(new Link(uriInfo.getAbsolutePath().toString() + "/" + order.getId(), rel, "application/json"));
                 return order;
         }
         

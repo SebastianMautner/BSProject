@@ -17,10 +17,13 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.Consumes;
 
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import jakarta.inject.Inject;
 
+import java.net.URI;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.CustomerDTO;
@@ -32,6 +35,10 @@ public class CustomerWebController {
     
     @Inject
     private  CustomerServiceAdapter cSA;
+
+    @Context
+    private UriInfo uriInfo;
+    private URI uri = uriInfo.getAbsolutePath();
     
     @GET
     @Path("{id}")
@@ -40,9 +47,9 @@ public class CustomerWebController {
         CustomerDTO customer = cSA.getCustomerById(id);
         customer = addSelfLink(customer, "getCustomerWithId" + customer.getId());
         return Response.ok(customer)
-        .header("Link", Link.customers.getHeaderLink())
-        .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink())
-        .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink()).build();
+        .header("Link", Link.customers.getHeaderLink(uri))
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink(uri))
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink(uri)).build();
     }
     
     @GET
@@ -58,40 +65,40 @@ public class CustomerWebController {
         if(query.isBlank()) {
             if (customers.next() && customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                 
             } else if(customers.next()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                 
             } else if(customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
             }
         }
         else {
             if (customers.next() && customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                 
             } else if(customers.next()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                 
             } else if(customers.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
             }
-            builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink());
+            builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
         }
         
         return builder
-        .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink())
-        .header("Link", Link.orders.getHeaderLink())
-        .header("Link", Link.devices.getHeaderLink())
-        .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink())
+        .header("Link", new Link(Link.customers.getHref() + "?query={query}", "getNewCustomerQuery", "application/json").getHeaderLink(uri))
+        .header("Link", Link.orders.getHeaderLink(uri))
+        .header("Link", Link.devices.getHeaderLink(uri))
+        .header("Link", new Link(Link.customers.getHref(), "createCustomer", "application/json").getHeaderLink(uri))
         .build();
     }
     
@@ -99,7 +106,7 @@ public class CustomerWebController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postCustomer(@Valid CustomerDTO customer) {
         CustomerDTO result = cSA.createCustomer(customer);
-        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink()).build();
+        return Response.status(Response.Status.CREATED).header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink(uri)).build();
     }
     
     @PUT
@@ -107,18 +114,18 @@ public class CustomerWebController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateCustomer(@Positive @PathParam("id") long id, @Valid CustomerDTO customer) {
         cSA.updateCustomer(id, customer);
-        return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink()).build();
+        return Response.noContent().header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uri)).build();
     }
     
     @DELETE
     @Path("{id}")
     public Response deleteCustomer(@Positive @PathParam("id") long id) {
         cSA.deleteCustomer(id);
-        return Response.noContent().header("Link", Link.customers.getHeaderLink()).build();
+        return Response.noContent().header("Link", Link.customers.getHeaderLink(uri)).build();
     }
     
     private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
-        customer.setSelf(new Link("http://localhost:8080/" + Link.customers.getHref() + "/" + customer.getId(), rel, "application/json"));
+        customer.setSelf(new Link(uriInfo.getAbsolutePath().toString() + "/" + customer.getId(), rel, "application/json"));
         return customer;
     }
     

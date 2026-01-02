@@ -5,9 +5,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
+import java.net.URI;
 import java.util.stream.Collectors;
 
 import sys.bac.adapters.in.api.models.DeviceDTO;
@@ -19,6 +22,10 @@ public class DeviceWebController {
     
     @Inject
     private DeviceServiceAdapter dSA;
+
+    @Context
+    private UriInfo uriInfo;
+    private URI uri = uriInfo.getAbsolutePath();
     
     @GET
     @Path("{deviceId}")
@@ -28,9 +35,9 @@ public class DeviceWebController {
         device = addSelfLink(device, "getDeviceWithId" + device.getId());
         
         return Response.ok(device)
-        .header("Link", Link.devices.getHeaderLink())
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink())
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink())
+        .header("Link", Link.devices.getHeaderLink(uri))
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink(uri))
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink(uri))
         .build();
     }
     
@@ -47,39 +54,39 @@ public class DeviceWebController {
         if(query.isBlank()) {
             if (devices.next() && devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                 
             } else if(devices.next()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uri));
                 
             } else if(devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uri));
             }
         }
         else {
             if (devices.next() && devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink())
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri))
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                 
             } else if(devices.next()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uri));
                 
             } else if(devices.prev()) {
                 builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink());
+                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uri));
             }
-            builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink());
+            builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink(uri));
         }
         return builder
-        .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink())
-        .header("Link", Link.customers.getHeaderLink())
-        .header("Link", Link.orders.getHeaderLink())
-        .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink())
+        .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink(uri))
+        .header("Link", Link.customers.getHeaderLink(uri))
+        .header("Link", Link.orders.getHeaderLink(uri))
+        .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink(uri))
         .build();
     }
     
@@ -89,7 +96,7 @@ public class DeviceWebController {
         DeviceDTO result = dSA.createDevice(device);
         
         return Response.status(Response.Status.CREATED)
-        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink())
+        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uri))
         .build();
     }
     
@@ -99,7 +106,7 @@ public class DeviceWebController {
     public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device) {
         dSA.updateDevice(id, device);
         return Response.noContent()
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink())
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uri))
         .build();
     }
     
@@ -108,12 +115,12 @@ public class DeviceWebController {
     public Response deleteDevice(@Positive @PathParam("id") long id) {
         dSA.deleteDevice(id);
         return Response.noContent()
-        .header("Link", Link.devices.getHeaderLink())
+        .header("Link", Link.devices.getHeaderLink(uri))
         .build();
     }
     
     private DeviceDTO addSelfLink(DeviceDTO dto, String rel) {
-        dto.setSelf(new Link( "http://localhost:8080/" + Link.devices.getHref() + "/" + dto.getId(), rel, "application/json"));
+        dto.setSelf(new Link(uriInfo.getAbsolutePath().toString() + Link.customers.getHref() + "/" + dto.getId(), rel, "application/json"));
         return dto;
     }
 
