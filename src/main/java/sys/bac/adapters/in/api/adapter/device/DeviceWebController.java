@@ -7,7 +7,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
@@ -72,7 +71,7 @@ public class DeviceWebController {
             return precond
                 .cacheControl(defaultGetCacheControl())
                 .tag(etag)
-                .header("Link", Link.devices.getHeaderLink())
+                .header("Link", Link.devices.getHeaderLink(uri))
                 .build();
         }
 

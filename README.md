@@ -27,7 +27,6 @@ proj (Main folder of the project, including files such as pom.xml)
 
 TODO:
 1:n (evtl. Verlinkung [wenn Lust und Zeit])
-HTTP Caching    WIP
 use cases
 ip-address
 ReadMe

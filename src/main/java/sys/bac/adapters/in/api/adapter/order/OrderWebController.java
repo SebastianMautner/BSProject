@@ -20,7 +20,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.inject.Inject;
 
@@ -42,7 +41,6 @@ public class OrderWebController {
                 
         @Context
         Request request;
-
 
         private CacheControl defaultGetCacheControl() {
                 CacheControl cc = new CacheControl();
@@ -83,15 +81,15 @@ public class OrderWebController {
                 return precond
                         .cacheControl(defaultGetCacheControl())
                         .tag(etag)
-                        .header("Link", Link.devices.getHeaderLink())
+                        .header("Link", Link.devices.getHeaderLink(uri))
                         .build();
                 }
                 return Response.ok(order)
                         .cacheControl(defaultGetCacheControl())
                         .tag(etag)
-                        .header("Link", Link.orders.getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink())
-                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink())
+                        .header("Link", Link.orders.getHeaderLink(uri))
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uri))
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uri))
                         .build();
         }
         
@@ -153,7 +151,7 @@ public class OrderWebController {
                 
                 return Response.status(Response.Status.CREATED)
                 .cacheControl(noStore())
-                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink())
+                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink(uri))
                 .build();
         }
         
@@ -164,7 +162,7 @@ public class OrderWebController {
                 oSA.updateOrder(id, order);
                 return Response.noContent()
                 .cacheControl(noStore())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink()).build();
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uri)).build();
         }
         
         @DELETE
@@ -173,7 +171,7 @@ public class OrderWebController {
                 oSA.deleteOrder(id);
                 return Response.noContent()
                 .cacheControl(noStore())
-                .header("Link", Link.orders.getHeaderLink())
+                .header("Link", Link.orders.getHeaderLink(uri))
                 .build();
         }
         

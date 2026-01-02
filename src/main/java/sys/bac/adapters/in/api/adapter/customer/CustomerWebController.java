@@ -20,8 +20,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.CacheControl;;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.inject.Inject;
@@ -43,6 +42,9 @@ public class CustomerWebController {
     @Context
     Request request;
 
+    @Context
+    private UriInfo uriInfo;
+    private URI uri = uriInfo.getAbsolutePath();
 
     private CacheControl defaultGetCacheControl() {
         CacheControl cc = new CacheControl();
@@ -79,15 +81,15 @@ public class CustomerWebController {
             return precond
                 .cacheControl(defaultGetCacheControl())
                 .tag(etag)
-                .header("Link", Link.devices.getHeaderLink())
+                .header("Link", Link.devices.getHeaderLink(uri))
                 .build();
         }
         return Response.ok(customer)
             .cacheControl(defaultGetCacheControl())
             .tag(etag)
-            .header("Link", Link.customers.getHeaderLink())
-            .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink())
-            .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink()).build();
+            .header("Link", Link.customers.getHeaderLink(uri))
+            .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink(uri))
+            .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink(uri)).build();
     }
     
     @GET
@@ -146,7 +148,7 @@ public class CustomerWebController {
         CustomerDTO result = cSA.createCustomer(customer);
         return Response.status(Response.Status.CREATED)
         .cacheControl(noStore())
-        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink()).build();
+        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink(uri))).build();
     }
     
     @PUT
@@ -156,7 +158,7 @@ public class CustomerWebController {
         cSA.updateCustomer(id, customer);
         return Response.noContent()
         .cacheControl(noStore())
-        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink()).build();
+        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uri))).build();
     }
     
     @DELETE
@@ -165,7 +167,7 @@ public class CustomerWebController {
         cSA.deleteCustomer(id);
         return Response.noContent()
         .cacheControl(noStore())
-        .header("Link", Link.customers.getHeaderLink()).build();
+        .header("Link", Link.customers.getHeaderLink(uri)).build();
     }
     
     private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
