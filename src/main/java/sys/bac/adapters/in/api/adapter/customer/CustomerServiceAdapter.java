@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import sys.bac.adapters.in.api.models.CustomerDTO;
@@ -79,6 +80,9 @@ public class CustomerServiceAdapter {
     @CacheInvalidateAll(cacheName = "customers-list")
     public CustomerDTO createCustomer(CustomerDTO customer) {
         LOG.infof("CREATE customer → cache invalidated");
+        if (customer == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
         CustomerResult result = poCUC.createCustomer(customer);
         if(result.hasError()) {
             throw new InternalServerErrorException(result.getMessage());

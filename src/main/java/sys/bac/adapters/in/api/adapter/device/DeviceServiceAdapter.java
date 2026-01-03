@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import sys.bac.adapters.in.api.models.DevicesApiResult;
@@ -68,6 +69,9 @@ public class DeviceServiceAdapter {
     @CacheInvalidateAll(cacheName = "devices-list")
     public DeviceDTO createDevice(DeviceDTO dto) {
         LOG.infof("CREATE device → cache invalidated");
+        if (dto == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
         DeviceResult res = postDevice.createDevice(dto);
         if (res.hasError()) {
             throw new IllegalArgumentException(res.getMessage());

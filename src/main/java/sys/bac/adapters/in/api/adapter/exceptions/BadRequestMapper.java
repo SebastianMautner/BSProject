@@ -24,16 +24,16 @@ public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
     public Response toResponse(BadRequestException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.status(400, ex.getMessage()).header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.status(400, ex.getMessage()).header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DeviceWebController.class) {
-            return Response.status(400, "Request is not valid for this location").header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.status(400, ex.getMessage()).header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.status(400, "Request is not valid for this location")
+            return Response.status(400, ex.getMessage())
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else {

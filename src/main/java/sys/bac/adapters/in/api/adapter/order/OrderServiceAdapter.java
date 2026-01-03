@@ -2,6 +2,7 @@ package sys.bac.adapters.in.api.adapter.order;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 
@@ -79,6 +80,9 @@ public class OrderServiceAdapter {
     @CacheInvalidateAll(cacheName = "orders-list")
     public OrderDTO createOrder(OrderDTO dto) {
         LOG.infof("CREATE order → cache invalidated");
+        if (dto == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
         OrderResult res = postOrderUC.createOrder(dto);
         if (res.hasError()) {
             throw new IllegalArgumentException(res.getMessage());
