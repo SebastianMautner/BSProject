@@ -174,7 +174,7 @@ public class OrderWebController {
         }
         
         private OrderDTO addSelfLink(OrderDTO order, String rel) {
-               order.setSelf(new Link(uriInfo.getAbsolutePath().toString() + "/" + order.getId(), rel, "application/json"));
+               order.setSelf(new Link(uriInfo.getBaseUri().toString() + "orders" + "/" + order.getId(), rel, "application/json"));
                 return order;
         }
         

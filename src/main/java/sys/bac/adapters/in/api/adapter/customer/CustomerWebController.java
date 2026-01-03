@@ -169,7 +169,7 @@ public class CustomerWebController {
     }
     
     private CustomerDTO addSelfLink(CustomerDTO customer, String rel) {
-        customer.setSelf(new Link(uriInfo.getBaseUri().toString().toString() + "/" + customer.getId(), rel, "application/json"));
+        customer.setSelf(new Link(uriInfo.getBaseUri().toString() + "customers" + "/" + customer.getId(), rel, "application/json"));
         return customer;
     }
     
