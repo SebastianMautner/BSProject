@@ -11,4 +11,9 @@ public class DevicesResult extends MultiResult<Device>{
     }
 
     public DevicesResult() {}
+
+    public DevicesResult(Page<Device> device, boolean error) {
+        super();
+        this.error = error;
+    } 
 }

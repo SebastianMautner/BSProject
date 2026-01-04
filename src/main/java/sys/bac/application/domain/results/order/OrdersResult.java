@@ -12,4 +12,9 @@ public class OrdersResult extends MultiResult<Order>{
     }
 
     public OrdersResult() {}
+
+    public OrdersResult(Page<Order> order, boolean error) {
+        super();
+        this.error = error;
+    } 
 }

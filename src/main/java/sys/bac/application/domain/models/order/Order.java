@@ -45,6 +45,26 @@ public class Order {
         this.status = status;
     }
 
+    public Order(long id,
+                 long customerId,
+                 long deviceId,
+                 String issueNotes,
+                 LocalDate receivedAt,
+                 LocalDate completion,
+                 float costEstimation,
+                 float finalCost,
+                 OrderStatus status) {
+        this.id = new LongId(id);
+        this.customerId = customerId;
+        this.deviceId = deviceId;
+        this.issueNotes = issueNotes;
+        this.receivedAt = receivedAt;
+        this.completion = completion;
+        this.costEstimation = costEstimation;
+        this.finalCost = finalCost;
+        this.status = status;
+    }
+
     public long getId() {
         return id.getId();
     }

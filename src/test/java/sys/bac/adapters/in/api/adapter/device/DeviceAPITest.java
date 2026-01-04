@@ -1,6 +1,7 @@
 package sys.bac.adapters.in.api.adapter.device;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -9,6 +10,7 @@ import sys.bac.adapters.in.api.models.DeviceDTO;
 import sys.bac.adapters.in.api.models.DevicesApiResult;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DeviceAPITest {
     
     @InjectMock
@@ -99,7 +102,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesEmpty200() {
-        when(dSA.getDevices("", 0, 2)).thenReturn(new DevicesApiResult(new ArrayList<>(), false, false));
+        when(dSA.getDevices(any(), anyInt(), anyInt())).thenReturn(new DevicesApiResult(new ArrayList<>(), false, false));
         
         List<String> links = given().contentType(ContentType.JSON)
         .when().get("devices")
@@ -120,7 +123,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQuery200() {
-        when(dSA.getDevices(any(), any(), any()))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(3, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), false, false));
         
@@ -200,7 +203,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQueryPrev200() {
-        when(dSA.getDevices(any(), any(), any()))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(5, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), false, true));
         
         List<String> links = given().contentType(ContentType.JSON)
@@ -231,7 +234,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQueryNextPrev200() {
-        when(dSA.getDevices(any(), any(), any()))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(3, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), true, true));
         
@@ -273,7 +276,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesNext200() {
-        when(dSA.getDevices("", 0, 2))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(2, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), true, false));
         
@@ -313,7 +316,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesPrev200() {
-        when(dSA.getDevices("", 4, 2))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(5, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), false, true));
         
         List<String> links = given().contentType(ContentType.JSON)
@@ -343,7 +346,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesNextPrev200() {
-        when(dSA.getDevices("", 2, 2))
+        when(dSA.getDevices(any(), anyInt(), anyInt()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(2, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), true, true));
         

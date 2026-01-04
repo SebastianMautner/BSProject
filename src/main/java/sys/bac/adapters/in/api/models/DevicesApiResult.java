@@ -1,6 +1,7 @@
 package sys.bac.adapters.in.api.models;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DevicesApiResult {
     private List<DeviceDTO> result;
@@ -32,5 +33,20 @@ public class DevicesApiResult {
 
     public boolean prev() {
         return prev;
+    }
+
+    @Override
+    public boolean equals(Object res) {
+        if (this == res) return true;
+        if (!(res instanceof DevicesApiResult)) return false;     
+        DevicesApiResult result = (DevicesApiResult) res;
+        return Objects.equals(this.result, result.result) &&
+        this.next == result.next &&
+        this.prev == result.prev;  
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(result, next, prev);
     }
 }

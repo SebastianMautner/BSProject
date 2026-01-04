@@ -6,6 +6,16 @@ public class NoContentResult extends AbstractResult{
     
     public NoContentResult() {}
 
+    public NoContentResult(int errorCode) {
+        super();
+        this.errorCode = errorCode;
+    }
+
+    public NoContentResult(boolean error) {
+        super();
+        this.error = error;
+    }
+
     public boolean isEmpty() {
         return true;
     }

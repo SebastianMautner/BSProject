@@ -12,6 +12,10 @@ public class Device {
     private String model;
     private String notes;
 
+    public Device() {
+        this.id = new LongId();
+    }
+
     public Device(LongId id,
                   long customerId,
                   String serialNumber,
@@ -20,6 +24,22 @@ public class Device {
                   String model,
                   String notes) {
         this.id = id;
+        this.customerId = customerId;
+        this.serialNumber = serialNumber;
+        this.type = type;
+        this.brand = brand;
+        this.model = model;
+        this.notes = notes;
+    }
+
+    public Device(long id,
+                  long customerId,
+                  String serialNumber,
+                  String type,
+                  String brand,
+                  String model,
+                  String notes) {
+        this.id = new LongId(id);
         this.customerId = customerId;
         this.serialNumber = serialNumber;
         this.type = type;

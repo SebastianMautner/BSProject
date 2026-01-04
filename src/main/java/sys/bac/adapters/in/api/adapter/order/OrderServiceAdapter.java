@@ -94,6 +94,9 @@ public class OrderServiceAdapter {
     @CacheInvalidateAll(cacheName = "orders-list")
     public void updateOrder(@CacheKey long id, OrderDTO dto) {  
         LOG.infof("UPDATE order id=%d → cache invalidated", id);
+        if (dto == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
         LongId oId = new LongId(id);
         NoContentResult result = putOrderUC.updateOrder(oId, dto);
         if (result.getErrorCode() == 404) {

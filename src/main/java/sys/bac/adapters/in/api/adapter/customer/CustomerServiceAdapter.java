@@ -95,6 +95,9 @@ public class CustomerServiceAdapter {
     public void updateCustomer(@CacheKey long id, CustomerDTO customer) {
         LOG.infof("UPDATE customer id=%d → cache invalidated", id);
         LongId cId =  new LongId(id);
+        if (customer == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
         NoContentResult result = puCUC.updateCustomer(cId, customer);
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();

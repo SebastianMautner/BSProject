@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+
 import sys.bac.adapters.in.api.models.DevicesApiResult;
 import sys.bac.adapters.in.api.models.DeviceDTO;
 import sys.bac.application.domain.models.LongId;
@@ -55,11 +56,12 @@ public class DeviceServiceAdapter {
     @CacheResult(cacheName = "device-by-id")
     public DeviceDTO getDeviceById(@CacheKey long id) {
         LOG.infof("CACHE-TEST: getDeviceById EXECUTED for id=%d", id);
-        DeviceResult res = getDeviceById.loadDeviceById(new LongId(id));
+        LongId dId = new LongId(id);
+        DeviceResult res = getDeviceById.loadDeviceById(dId);
         if (res.isEmpty()) {
             throw new NotFoundException();
         } else if (res.hasError()) {
-            throw new IllegalArgumentException(res.getMessage());
+            throw new InternalServerErrorException(res.getMessage());
         }
         else {
             return mapper.toDTO(res.getResult());
@@ -74,7 +76,7 @@ public class DeviceServiceAdapter {
         }
         DeviceResult res = postDevice.createDevice(dto);
         if (res.hasError()) {
-            throw new IllegalArgumentException(res.getMessage());
+            throw new InternalServerErrorException(res.getMessage());
         }
         return mapper.toDTO(res.getResult());
     }
@@ -83,7 +85,11 @@ public class DeviceServiceAdapter {
     @CacheInvalidateAll(cacheName = "devices-list")
     public void updateDevice(@CacheKey long id, DeviceDTO dto) {
         LOG.infof("UPDATE device id=%d → cache invalidated", id);
-        NoContentResult result = putDevice.updateDevice(new LongId(id), dto);
+        if (dto == null) {
+            throw new BadRequestException("Body should contain the new Object");
+        }
+        LongId dId = new LongId(id);
+        NoContentResult result = putDevice.updateDevice(dId, dto);
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if (result.hasError()) {

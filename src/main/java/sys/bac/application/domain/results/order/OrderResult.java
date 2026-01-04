@@ -11,4 +11,9 @@ public class OrderResult extends SingleResult<Order> {
     public OrderResult(Order result) {
         super(result);
     }
+
+    public OrderResult(boolean error) {
+        this.result = new Order();
+        this.error = error;
+    }
 }

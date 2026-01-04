@@ -12,4 +12,9 @@ public class CustomersResult extends MultiResult<Customer>{
 
     public CustomersResult() {
     }
+
+    public CustomersResult(Page<Customer> customer, boolean error) {
+        super();
+        this.error = error;
+    } 
 }
