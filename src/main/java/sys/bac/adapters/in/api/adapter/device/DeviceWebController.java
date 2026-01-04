@@ -26,14 +26,14 @@ public class DeviceWebController {
     
     @Inject
     private DeviceServiceAdapter dSA;
-
+    
     @Context
     private UriInfo uriInfo;
     
     @Context
     Request request;
-
-
+    
+    
     private CacheControl defaultGetCacheControl() {
         CacheControl cc = new CacheControl();
         cc.setPrivate(true);
@@ -41,39 +41,41 @@ public class DeviceWebController {
         cc.setMustRevalidate(true); 
         return cc;
     }
-
-
+    
+    
     private CacheControl noStore() {
         CacheControl cc = new CacheControl();
         cc.setNoStore(true);
         cc.setNoCache(true);
         return cc;
     }
-
+    
     private EntityTag etagOf(Object... parts) {
         String value = Integer.toHexString(Objects.hash(parts));
         return new EntityTag(value, true);
     }
-
+    
     @GET
     @Path("{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDeviceById(@Positive @PathParam("deviceId") long id) {
         DeviceDTO device = dSA.getDeviceById(id);
         device = addSelfLink(device, "getDeviceWithId" + device.getId());
-
+        
         EntityTag etag = etagOf(device);
-
+        
         Response.ResponseBuilder precond = request.evaluatePreconditions(etag);
         if (precond != null) {
             return precond
-                .cacheControl(defaultGetCacheControl())
-                .tag(etag)
-                .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
-                .build();
+            .cacheControl(defaultGetCacheControl())
+            .tag(etag)
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .build();
         }
-
+        
         return Response.ok(device)
+        .cacheControl(defaultGetCacheControl())
+        .tag(etag)
         .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
         .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
@@ -165,20 +167,20 @@ public class DeviceWebController {
         dto.setSelf(new Link(uriInfo.getBaseUri().toString() + "devices" + "/" + dto.getId(), rel, "application/json"));
         return dto;
     }
-
+    
     @DELETE
-        public void ErrorDelete() {
-                throw new NotAllowedException("No DELETE for path devices/");
-        }
-        
-        @PUT
-        public void ErrorUpdate() {
-                throw new NotAllowedException("No PUT for path devices/");
-        }
-        
-        @POST
-        @Path("{id}")
-        public void ErrorPost() {
-                throw new NotAllowedException("No POST for path devices/id");
-        }
+    public void ErrorDelete() {
+        throw new NotAllowedException("No DELETE for path devices/");
+    }
+    
+    @PUT
+    public void ErrorUpdate() {
+        throw new NotAllowedException("No PUT for path devices/");
+    }
+    
+    @POST
+    @Path("{id}")
+    public void ErrorPost() {
+        throw new NotAllowedException("No POST for path devices/id");
+    }
 }

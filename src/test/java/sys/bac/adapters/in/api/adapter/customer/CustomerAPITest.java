@@ -122,32 +122,250 @@ public class CustomerAPITest {
             when(cSA.getCustomers("James", 0, 2))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
             new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, false));
-                
-                List<String> links = given().contentType(ContentType.JSON)
-                .when().get("customers?query=James")
-                .then()
-                .statusCode(200)
-                .body("[0].id", equalTo(1))
-                .body("[0].surname", equalTo("Bond"))
-                .body("[0].name", equalTo("James"))
-                .body("[0].email", equalTo("test@test.de"))
-                .body("[0].phone", equalTo("+44 12312345678"))
-                .body("[1].id", equalTo(3))
-                .body("[1].surname", equalTo("Moneypenny"))
-                .body("[1].name", equalTo("James"))
-                .body("[1].email", equalTo("test@test.de"))
-                .body("[1].phone", equalTo("+44 12312345678"))
-                .header("Content-Type", "application/json;charset=UTF-8")
-                .header("content-length", equalTo("397"))
-                .extract()
-                .headers()
-                .getValues("Link");
-                assertThat(links.size(), is(5));
-                assertThat(links, hasItems("<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
-                "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
-                "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
-                "<http://localhost:8081/customers>;rel=\"clearQuery\";type=\"application/json\"",
-                "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
-            }
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?query=James")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(1))
+            .body("[0].surname", equalTo("Bond"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .body("[1].id", equalTo(3))
+            .body("[1].surname", equalTo("Moneypenny"))
+            .body("[1].name", equalTo("James"))
+            .body("[1].email", equalTo("test@test.de"))
+            .body("[1].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("397"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(5));
+            assertThat(links, hasItems("<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"clearQuery\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
         }
-        
+
+        @Test
+        public void getCustomersQueryNext200() {
+            when(cSA.getCustomers("James", 0, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
+            new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, false));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?query=James")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(1))
+            .body("[0].surname", equalTo("Bond"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .body("[1].id", equalTo(3))
+            .body("[1].surname", equalTo("Moneypenny"))
+            .body("[1].name", equalTo("James"))
+            .body("[1].email", equalTo("test@test.de"))
+            .body("[1].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("397"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(6));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=2&size=2&query=James>;rel=\"next\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"clearQuery\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void getCustomersQueryPrev200() {
+            when(cSA.getCustomers("James", 4, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(5, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, true));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?query=James&offset=4&size=2")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(5))
+            .body("[0].surname", equalTo("Moneypenny"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("202"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(6));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=2&size=2&query=James>;rel=\"prev\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"clearQuery\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void getCustomersQueryNextPrev200() {
+            when(cSA.getCustomers("James", 2, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(3, "Bond", "James", "test@test.de", "+44 12312345678"),
+                new CustomerDTO(4, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, true));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?query=James&offset=2&size=2")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(3))
+            .body("[0].surname", equalTo("Bond"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .body("[1].id", equalTo(4))
+            .body("[1].surname", equalTo("Moneypenny"))
+            .body("[1].name", equalTo("James"))
+            .body("[1].email", equalTo("test@test.de"))
+            .body("[1].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("397"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(7));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=4&size=2&query=James>;rel=\"next\";type=\"application/json\"",
+            "<http://localhost:8081/customers?offset=0&size=2&query=James>;rel=\"prev\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"clearQuery\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void getCustomersNext200() {
+            when(cSA.getCustomers("", 0, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
+            new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, false));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(1))
+            .body("[0].surname", equalTo("Bond"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .body("[1].id", equalTo(3))
+            .body("[1].surname", equalTo("Moneypenny"))
+            .body("[1].name", equalTo("James"))
+            .body("[1].email", equalTo("test@test.de"))
+            .body("[1].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("397"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(5));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=2&size=2>;rel=\"next\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void getCustomersPrev200() {
+            when(cSA.getCustomers("", 4, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(5, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, true));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?offset=4&size=2")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(5))
+            .body("[0].surname", equalTo("Moneypenny"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("202"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(5));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=2&size=2>;rel=\"prev\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void getCustomersNextPrev200() {
+            when(cSA.getCustomers("", 2, 2))
+            .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(3, "Bond", "James", "test@test.de", "+44 12312345678"),
+                new CustomerDTO(4, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, true));
+            
+            List<String> links = given().contentType(ContentType.JSON)
+            .when().get("customers?offset=2&size=2")
+            .then()
+            .statusCode(200)
+            .body("[0].id", equalTo(3))
+            .body("[0].surname", equalTo("Bond"))
+            .body("[0].name", equalTo("James"))
+            .body("[0].email", equalTo("test@test.de"))
+            .body("[0].phone", equalTo("+44 12312345678"))
+            .body("[1].id", equalTo(4))
+            .body("[1].surname", equalTo("Moneypenny"))
+            .body("[1].name", equalTo("James"))
+            .body("[1].email", equalTo("test@test.de"))
+            .body("[1].phone", equalTo("+44 12312345678"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header("content-length", equalTo("397"))
+            .extract()
+            .headers()
+            .getValues("Link");
+            assertThat(links.size(), is(6));
+            assertThat(links, hasItems("<http://localhost:8081/customers?offset=4&size=2>;rel=\"next\";type=\"application/json\"",
+            "<http://localhost:8081/customers?offset=0&size=2>;rel=\"prev\";type=\"application/json\"",
+            "<http://localhost:8081/customers?query={query}>;rel=\"getNewCustomerQuery\";type=\"application/json\"",
+            "<http://localhost:8081/orders>;rel=\"getAllOrders\";type=\"application/json\"",
+            "<http://localhost:8081/devices>;rel=\"getAllDevices\";type=\"application/json\"",
+            "<http://localhost:8081/customers>;rel=\"createCustomer\";type=\"application/json\""));
+        }
+
+        @Test
+        public void delete405() {
+            given()
+            .when().delete("customers")
+            .then()
+            .statusCode(405)
+            .header("Link", "<http://localhost:8081/customers>;rel=\"getAllCustomers\";type=\"application/json\"");
+        }
+
+        @Test
+        public void put405() {
+            given()
+            .when().put("customers")
+            .then()
+            .statusCode(405)
+            .header("Link", "<http://localhost:8081/customers>;rel=\"getAllCustomers\";type=\"application/json\"");
+        }
+
+        @Test
+        public void post405() {
+            given()
+            .when().post("customers/1")
+            .then()
+            .statusCode(405)
+            .header("Link", "<http://localhost:8081/customers>;rel=\"getAllCustomers\";type=\"application/json\"");
+        }
+    }
+    

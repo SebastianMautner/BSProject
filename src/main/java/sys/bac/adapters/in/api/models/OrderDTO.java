@@ -33,6 +33,19 @@ public class OrderDTO extends AbstractDataTransferObject {
     @NotNull
     private OrderStatus status;
 
+    public OrderDTO() {
+    }
+
+    public OrderDTO(long id, long customerId, long deviceId, String issueNotes, LocalDate receivedAt, float costEstimation, OrderStatus status) {
+        this.id = id;
+        this.customerId = customerId;
+        this.deviceId = deviceId;
+        this.receivedAt = receivedAt;
+        this.issueNotes = issueNotes;
+        this.costEstimation = costEstimation;
+        this.status = status;
+    }
+
     public long getCustomerId() {
         return customerId;
     }

@@ -20,9 +20,20 @@ public class DeviceDTO extends AbstractDataTransferObject {
     @NotBlank
     private String model;
 
-    @NotBlank
     private String notes;
 
+    public DeviceDTO() {
+    }
+
+    public DeviceDTO(long id, long customerId, String serialNumber, String type, String brand, String model, String notes) {
+        this.id = id;
+        this.customerId = customerId;
+        this.serialNumber = serialNumber;
+        this.type = type;
+        this.brand = brand;
+        this.model = model;
+        this.notes = notes; 
+    }
 
     public long getCustomerId() { return customerId; }
     public void setCustomerId(long customerId) { this.customerId = customerId; }
