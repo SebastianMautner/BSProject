@@ -47,6 +47,18 @@ public class OrderDTO extends AbstractDataTransferObject {
         this.status = status;
     }
 
+    public OrderDTO(long id, long customerId, long deviceId, String issueNotes, LocalDate receivedAt, LocalDate completion, float costEstimation, float finalCost, OrderStatus status) {
+        this.id = id;
+        this.customerId = customerId;
+        this.deviceId = deviceId;
+        this.receivedAt = receivedAt;
+        this.completion = completion;
+        this.issueNotes = issueNotes;
+        this.costEstimation = costEstimation;
+        this.finalCost = finalCost;
+        this.status = status;
+    }
+
     public long getCustomerId() {
         return customerId;
     }
@@ -120,8 +132,8 @@ public class OrderDTO extends AbstractDataTransferObject {
         customerId == dto2.customerId &&
         deviceId == dto2.deviceId &&
         issueNotes == dto2.issueNotes &&
-        receivedAt == dto2.receivedAt &&
-        completion == dto2.completion &&
+        Objects.equals(receivedAt, dto2.receivedAt) &&
+        Objects.equals(completion, dto2.completion) &&
         costEstimation == dto2.costEstimation &&
         finalCost == dto2.finalCost &&
         status == dto2.status;

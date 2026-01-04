@@ -56,7 +56,7 @@ public class OrderServiceAdapter {
         if (res.isEmpty()) {
             throw new NotFoundException();
         } else if (res.hasError()) {
-            throw new IllegalArgumentException(res.getMessage());
+            throw new InternalServerErrorException(res.getMessage());
         }
         else {
             return mapper.toDTO(res.getResult());
@@ -85,7 +85,7 @@ public class OrderServiceAdapter {
         }
         OrderResult res = postOrderUC.createOrder(dto);
         if (res.hasError()) {
-            throw new IllegalArgumentException(res.getMessage());
+            throw new InternalServerErrorException(res.getMessage());
         }
         return mapper.toDTO(res.getResult());
     }
