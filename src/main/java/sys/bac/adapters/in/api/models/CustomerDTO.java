@@ -1,5 +1,7 @@
 package sys.bac.adapters.in.api.models;
 
+import java.util.Objects;
+
 import jakarta.validation.constraints.NotBlank;
 
 public class CustomerDTO extends AbstractDataTransferObject{
@@ -57,5 +59,22 @@ public class CustomerDTO extends AbstractDataTransferObject{
 
     public void setPhoneNr(String phoneNr) {
         this.phone = phoneNr;
+    }
+
+    @Override
+    public boolean equals(Object dto) {
+        if (this == dto) return true;
+        if(!(dto instanceof CustomerDTO)) return false;
+        CustomerDTO dto2 = (CustomerDTO) dto;
+        return id == dto2.id &&
+        surname == dto2.surname &&
+        name == dto2.name &&
+        eMail == dto2.eMail &&
+        phone == dto2.phone;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, surname, name, eMail, phone);
     }
 }
