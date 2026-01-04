@@ -86,8 +86,8 @@ public class CustomerWebController {
         .cacheControl(defaultGetCacheControl())
         .tag(etag)
         .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", new Link(Link.customers.getHref() + "/" + id, "updatePerson", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", new Link(Link.customers.getHref() + "/" + id, "deletePerson", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "updateCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "deleteCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
     }
     
     @GET

@@ -52,6 +52,6 @@ public class Link {
     }
     
     public String toString(String uri) {
-        return "Link {href=" + getHeaderHref(uri) + "; rel=\"" + getRel() + "\"; type=\"" + getType() + "\"}";
+        return "Link: {href= " + getHeaderHref(uri) + "; rel= \"" + getRel() + "\"; type= \"" + getType() + "\"}";
     }
 }
