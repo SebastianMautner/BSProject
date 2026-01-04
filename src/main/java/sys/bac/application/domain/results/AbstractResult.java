@@ -2,11 +2,11 @@ package sys.bac.application.domain.results;
 
 public abstract class AbstractResult {
     
-    private boolean error;
+    protected boolean error;
     
-    private int errorCode;
+    protected int errorCode;
 
-    private String errorMessage;
+    protected String errorMessage;
 
     protected AbstractResult() {
         error = false;

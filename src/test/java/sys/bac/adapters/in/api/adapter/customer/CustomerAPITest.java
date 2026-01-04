@@ -98,7 +98,7 @@ public class CustomerAPITest {
         
         @Test
         public void getCustomersEmpty200() {
-            when(cSA.getCustomers("", 0, 2)).thenReturn(new CustomersApiResult(new ArrayList<>(), false, false));
+            when(cSA.getCustomers(any(), any(), any())).thenReturn(new CustomersApiResult(new ArrayList<>(), false, false));
             
             List<String> links = given().contentType(ContentType.JSON)
             .when().get("customers")
@@ -119,7 +119,7 @@ public class CustomerAPITest {
         
         @Test
         public void getCustomersQuery200() {
-            when(cSA.getCustomers("James", 0, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
             new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, false));
             
@@ -152,7 +152,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersQueryNext200() {
-            when(cSA.getCustomers("James", 0, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
             new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, false));
             
@@ -186,7 +186,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersQueryPrev200() {
-            when(cSA.getCustomers("James", 4, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(5, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, true));
             
             List<String> links = given().contentType(ContentType.JSON)
@@ -214,7 +214,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersQueryNextPrev200() {
-            when(cSA.getCustomers("James", 2, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(3, "Bond", "James", "test@test.de", "+44 12312345678"),
                 new CustomerDTO(4, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, true));
             
@@ -249,7 +249,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersNext200() {
-            when(cSA.getCustomers("", 0, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 12312345678"),
             new CustomerDTO(3, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, false));
             
@@ -282,7 +282,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersPrev200() {
-            when(cSA.getCustomers("", 4, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(5, "Moneypenny", "James", "test@test.de", "+44 12312345678")), false, true));
             
             List<String> links = given().contentType(ContentType.JSON)
@@ -309,7 +309,7 @@ public class CustomerAPITest {
 
         @Test
         public void getCustomersNextPrev200() {
-            when(cSA.getCustomers("", 2, 2))
+            when(cSA.getCustomers(any(), any(), any()))
             .thenReturn(new CustomersApiResult(Arrays.asList(new CustomerDTO(3, "Bond", "James", "test@test.de", "+44 12312345678"),
                 new CustomerDTO(4, "Moneypenny", "James", "test@test.de", "+44 12312345678")), true, true));
             

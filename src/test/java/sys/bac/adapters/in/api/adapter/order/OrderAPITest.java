@@ -101,7 +101,7 @@ public class OrderAPITest {
     
     @Test
     public void getOrdersEmpty200() {
-        when(oSA.getOrders("", 0, 2)).thenReturn(new OrdersApiResult(new ArrayList<>(), false, false));
+        when(oSA.getOrders(any(), any(), any())).thenReturn(new OrdersApiResult(new ArrayList<>(), false, false));
         
         List<String> links = given().contentType(ContentType.JSON)
         .when().get("orders")
@@ -282,7 +282,7 @@ public class OrderAPITest {
     
     @Test
     public void getOrdersNext200() {
-        when(oSA.getOrders("", 0, 2))
+        when(oSA.getOrders(any(), any(), any()))
         .thenReturn(new OrdersApiResult(Arrays.asList(new OrderDTO(1, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED),
         new OrderDTO(3, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED)), true, false));
         
@@ -324,7 +324,7 @@ public class OrderAPITest {
     
     @Test
     public void getOrdersPrev200() {
-        when(oSA.getOrders("", 4, 2))
+        when(oSA.getOrders(any(), any(), any()))
         .thenReturn(new OrdersApiResult(Arrays.asList(new OrderDTO(5, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED)), false, true));
         
         List<String> links = given().contentType(ContentType.JSON)
@@ -355,7 +355,7 @@ public class OrderAPITest {
     
     @Test
     public void getOrdersNextPrev200() {
-        when(oSA.getOrders("", 2, 2))
+        when(oSA.getOrders(any(), any(), any()))
         .thenReturn(new OrdersApiResult(Arrays.asList(new OrderDTO(1, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED),
         new OrderDTO(2, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED)), true, true));
         

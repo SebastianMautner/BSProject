@@ -120,7 +120,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQuery200() {
-        when(dSA.getDevices("Apple", 0, 2))
+        when(dSA.getDevices(any(), any(), any()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(3, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), false, false));
         
@@ -200,7 +200,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQueryPrev200() {
-        when(dSA.getDevices("Apple", 4, 2))
+        when(dSA.getDevices(any(), any(), any()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(5, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), false, true));
         
         List<String> links = given().contentType(ContentType.JSON)
@@ -231,7 +231,7 @@ public class DeviceAPITest {
     
     @Test
     public void getDevicesQueryNextPrev200() {
-        when(dSA.getDevices("Apple", 2, 2))
+        when(dSA.getDevices(any(), any(), any()))
         .thenReturn(new DevicesApiResult(Arrays.asList(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"),
         new DeviceDTO(3, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen")), true, true));
         

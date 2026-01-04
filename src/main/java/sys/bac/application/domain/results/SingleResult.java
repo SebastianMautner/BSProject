@@ -1,7 +1,7 @@
 package sys.bac.application.domain.results;
 
 public class SingleResult<T> extends AbstractResult {
-    private T result;
+    protected T result;
 
     public SingleResult() {
     }
