@@ -53,7 +53,7 @@ public class OrderServiceAdapter {
         LOG.infof("CACHE-TEST: getOrderById EXECUTED for id=%d", id);
         LongId oId = new LongId(id);
         OrderResult res = getOrderByIdUC.loadOrderById(oId);
-        if (res.isEmpty()) {
+        if (res.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if (res.hasError()) {
             throw new InternalServerErrorException(res.getMessage());

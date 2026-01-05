@@ -16,7 +16,11 @@ public class GetDeviceService implements GetDeviceByIdUseCase {
 
     @Override
     public DeviceResult loadDeviceById(LongId id) {
-        return deviceRepo.getDeviceById(id);
+        DeviceResult result = deviceRepo.getDeviceById(id);
+        if (result.isEmpty()) {
+            result.setError(404, "NotFound");
+        }
+        return result;
     }
 }
 

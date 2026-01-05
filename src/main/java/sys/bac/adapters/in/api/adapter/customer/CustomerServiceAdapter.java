@@ -53,7 +53,7 @@ public class CustomerServiceAdapter {
         LongId cId = new LongId(id);
         CustomerResult customer = gCBIUC.loadCustomerById(cId);
         
-        if (customer.isEmpty()) {
+        if (customer.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if(customer.hasError()){
             throw new InternalServerErrorException(customer.getMessage());

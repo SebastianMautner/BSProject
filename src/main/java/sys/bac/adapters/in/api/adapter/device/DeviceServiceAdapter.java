@@ -58,7 +58,7 @@ public class DeviceServiceAdapter {
         LOG.infof("CACHE-TEST: getDeviceById EXECUTED for id=%d", id);
         LongId dId = new LongId(id);
         DeviceResult res = getDeviceById.loadDeviceById(dId);
-        if (res.isEmpty()) {
+        if (res.getErrorCode() == 404) {
             throw new NotFoundException();
         } else if (res.hasError()) {
             throw new InternalServerErrorException(res.getMessage());

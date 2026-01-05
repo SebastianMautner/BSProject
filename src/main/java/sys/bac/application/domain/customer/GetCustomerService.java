@@ -15,6 +15,10 @@ public class GetCustomerService implements GetCustomerByIdUseCase{
     private CustomerRepository customerRepo;
 
     public CustomerResult loadCustomerById(LongId cId) {
-        return customerRepo.getCustomerById(cId);
+        CustomerResult result = customerRepo.getCustomerById(cId);
+        if (result.isEmpty()) {
+            result.setError(404, "NotFound");
+        }
+        return result;
     }
 }

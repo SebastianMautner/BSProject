@@ -10,12 +10,16 @@ import sys.bac.application.port.out.OrderRepository;
 
 @ApplicationScoped
 public class GetOrderService implements GetOrderByIdUseCase {
-
+    
     @Inject
     private OrderRepository orderRepo;
-
+    
     public OrderResult loadOrderById(LongId oId) {
-        return orderRepo.getOrderById(oId);
+        OrderResult result = orderRepo.getOrderById(oId);
+        if (result.isEmpty()) {
+            result.setError(404, "NotFound");
+        }
+        return result;
     }
 }
 
