@@ -12,6 +12,13 @@ public class CustomerResult extends SingleResult<Customer> {
         super(result);
     }
 
+    public CustomerResult(boolean error, int errorCode) {
+        super();
+        this.result = new Customer();
+        this.error = error;
+        this.errorCode = errorCode;
+    }
+
     public CustomerResult(boolean error) {
         super();
         this.result = new Customer();

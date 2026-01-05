@@ -1,11 +1,10 @@
 package sys.bac.adapters.in.api.adapter.customer;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServerErrorException;
@@ -31,26 +30,25 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 
 
-@QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CustomerAdapterTest {
-    @InjectMock
+@ExtendWith(MockitoExtension.class)
+public class CustomerServiceAdapterTest {
+    @Mock
     PostCustomerUseCase poCUC;
-    @InjectMock
+    @Mock
     PutCustomerUseCase puCUC;
-    @InjectMock
+    @Mock
     GetCustomerByIdUseCase gCBIUC;
-    @InjectMock
+    @Mock
     GetCustomersUseCase gCUC;
-    @InjectMock
+    @Mock
     DeleteCustomerUseCase dCUC;
-    @Inject
+    @InjectMocks
     CustomerServiceAdapter cSA;
     
     @Test
     public void getByIDEmptyTest() {
         when(gCBIUC.loadCustomerById(any()))
-        .thenReturn(new CustomerResult());
+        .thenReturn(new CustomerResult(true, 404));
         assertThrows(NotFoundException.class, () -> cSA.getCustomerById(0));
     }
     

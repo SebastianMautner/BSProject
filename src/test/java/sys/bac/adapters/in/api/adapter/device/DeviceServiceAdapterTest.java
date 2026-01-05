@@ -1,11 +1,10 @@
 package sys.bac.adapters.in.api.adapter.device;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.mockito.Mock;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServerErrorException;
@@ -30,27 +29,25 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 
-
-@QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DeviceAdapterTest {
-    @InjectMock
+@ExtendWith(MockitoExtension.class)
+public class DeviceServiceAdapterTest {
+    @Mock
     PostDeviceUseCase poDUC;
-    @InjectMock
+    @Mock
     PutDeviceUseCase puDUC;
-    @InjectMock
+    @Mock
     GetDeviceByIdUseCase gDBIUC;
-    @InjectMock
+    @Mock
     GetDevicesUseCase gDUC;
-    @InjectMock
+    @Mock
     DeleteDeviceUseCase dDUC;
-    @Inject
+    @InjectMocks
     DeviceServiceAdapter dSA;
     
     @Test
     public void getByIDEmptyTest() {
         when(gDBIUC.loadDeviceById(any()))
-        .thenReturn(new DeviceResult());
+        .thenReturn(new DeviceResult(true, 404));
         assertThrows(NotFoundException.class, () -> dSA.getDeviceById(0));
     }
     

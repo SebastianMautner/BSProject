@@ -15,5 +15,11 @@ public class DeviceResult extends SingleResult<Device> {
         this.result = new Device();
         this.error = error;
     }
+
+    public DeviceResult(boolean error, int errorCode) {
+        this.result = new Device();
+        this.error = error;
+        this.errorCode = errorCode;
+    }
 }
 

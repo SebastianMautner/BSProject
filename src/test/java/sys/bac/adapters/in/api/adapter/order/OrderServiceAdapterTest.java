@@ -1,11 +1,11 @@
 package sys.bac.adapters.in.api.adapter.order;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServerErrorException;
@@ -33,26 +33,25 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 
-@QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class OrderAdapterTest {
-    @InjectMock
+@ExtendWith(MockitoExtension.class)
+public class OrderServiceAdapterTest {
+    @Mock
     PostOrderUseCase poOUC;
-    @InjectMock
+    @Mock
     PutOrderUseCase puOUC;
-    @InjectMock
+    @Mock
     GetOrderByIdUseCase gOBIUC;
-    @InjectMock
+    @Mock
     GetOrdersUseCase gOUC;
-    @InjectMock
+    @Mock
     DeleteOrderUseCase dOUC;
-    @Inject
+    @InjectMocks
     OrderServiceAdapter oSA;
     
     @Test
     public void getByIDEmptyTest() {
         when(gOBIUC.loadOrderById(any()))
-        .thenReturn(new OrderResult());
+        .thenReturn(new OrderResult(true, 404));
         assertThrows(NotFoundException.class, () -> oSA.getOrderById(0));
     }
     
