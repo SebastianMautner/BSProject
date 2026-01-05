@@ -1,8 +1,8 @@
 package sys.bac.application.domain.results;
 
-public class NoContentResult extends AbstractResult{
+import java.util.Objects;
 
-    private long id;
+public class NoContentResult extends AbstractResult{
     
     public NoContentResult() {}
 
@@ -20,11 +20,18 @@ public class NoContentResult extends AbstractResult{
         return true;
     }
 
-    public long getId() {
-        return id;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NoContentResult)) return false;
+        NoContentResult res = (NoContentResult) o;
+        return this.error == res.error &&
+        this.errorCode == res.errorCode &&
+        this.errorMessage == res.errorMessage;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    @Override 
+    public int hashCode() {
+        return Objects.hash(error, errorCode, errorMessage);
     }
 }

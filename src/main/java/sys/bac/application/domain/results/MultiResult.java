@@ -3,7 +3,7 @@ package sys.bac.application.domain.results;
 import sys.bac.application.domain.models.Page;
 
 public class MultiResult<T> extends AbstractResult {
-    Page<T> result;
+    protected Page<T> result;
     
     public MultiResult() {
     }

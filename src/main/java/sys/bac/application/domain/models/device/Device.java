@@ -1,5 +1,7 @@
 package sys.bac.application.domain.models.device;
 
+import java.util.Objects;
+
 import sys.bac.application.domain.models.LongId;
 
 public class Device {
@@ -78,6 +80,24 @@ public class Device {
 
     public String getNotes() {
         return notes;
+    }
+
+    @Override
+    public boolean equals(Object dto) {
+        if (this == dto) return true;
+        if(!(dto instanceof Device)) return false;
+        Device dto2 = (Device) dto;
+        return Objects.equals(this.id, dto2.id) &&
+        customerId == dto2.customerId &&
+        type == dto2.type &&
+        brand == dto2.brand &&
+        model == dto2.model &&
+        notes == dto2.notes;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, customerId, type, brand, model, notes);
     }
 }
 

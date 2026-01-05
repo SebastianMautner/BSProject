@@ -3,7 +3,7 @@ package sys.bac.application.domain.results;
 import java.util.List;
 
 public class JpaMultiResult<T> extends AbstractResult{
-    private List<T> results;
+    protected List<T> results;
 
     public JpaMultiResult() {
     }

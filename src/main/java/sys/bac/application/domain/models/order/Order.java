@@ -1,6 +1,7 @@
 package sys.bac.application.domain.models.order;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import sys.bac.application.domain.models.LongId;
 
@@ -21,8 +22,6 @@ public class Order {
 
     public Order() {
         this.id = new LongId();
-        this.status = OrderStatus.RECEIVED;
-        this.receivedAt = LocalDate.now();
     }
 
     public Order(LongId id,
@@ -107,5 +106,26 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object dto) {
+        if (this == dto) return true;
+        if(!(dto instanceof Order)) return false;
+        Order dto2 = (Order) dto;
+        return Objects.equals(this.id, dto2.id) &&
+        customerId == dto2.customerId &&
+        deviceId == dto2.deviceId &&
+        issueNotes == dto2.issueNotes &&
+        Objects.equals(receivedAt, dto2.receivedAt) &&
+        Objects.equals(completion, dto2.completion) &&
+        costEstimation == dto2.costEstimation &&
+        finalCost == dto2.finalCost &&
+        status == dto2.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, customerId, deviceId, issueNotes, receivedAt, completion, costEstimation, finalCost, status);
     }
 }
