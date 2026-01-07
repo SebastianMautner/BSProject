@@ -37,6 +37,7 @@ public class CustomerJpaAdapter implements CustomerRepository{
         try {
             CustomerJPAEntity c = mapper.toJPA(customer);
             eM.persist(c);
+            eM.flush();
             result.setResult(mapper.toCustomer(c));
         }
         catch(Exception e) {
@@ -67,11 +68,13 @@ public class CustomerJpaAdapter implements CustomerRepository{
                         predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
                     }
                 }
+
                 if(!predicates.isEmpty()) {
                     cQ.where(cB.or(predicates.toArray(new Predicate[0])));
                 }
             }
             
+            cQ.orderBy(cB.asc(root.get("id")));
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
             .setMaxResults(size)
@@ -115,12 +118,10 @@ public class CustomerJpaAdapter implements CustomerRepository{
         NoContentResult result = new NoContentResult();
         try {
             CustomerJPAEntity c = eM.find(CustomerJPAEntity.class, id.getId());
-            eM.detach(c);
             c.setSurname(customer.getSurname());
             c.setFirstName(customer.getName());
             c.setEMail(customer.getEMail());
             c.setPhone(customer.getPhone());
-            eM.merge(c);
         }
         catch(Exception e) {
             result.setError(500, e.getMessage());

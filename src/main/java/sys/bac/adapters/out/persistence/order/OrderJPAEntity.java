@@ -3,6 +3,7 @@ package sys.bac.adapters.out.persistence.order;
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
+import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
 import sys.bac.adapters.out.persistence.device.DeviceJPAEntity;
 import sys.bac.application.domain.models.order.OrderStatus;
 
@@ -13,12 +14,6 @@ public class OrderJPAEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(nullable = false)
-    private long customerId;
-
-    @Column(nullable = false)
-    private long deviceId;
 
     @Column(length = 2000)
     private String issueNotes;
@@ -32,33 +27,34 @@ public class OrderJPAEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "deviceId", referencedColumnName = "id",
-                insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "deviceId")
     private DeviceJPAEntity device;
 
-    public OrderJPAEntity() {}
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customerId")
+    private CustomerJPAEntity customer;
 
-    // Getter / Setter
+    public OrderJPAEntity() {}
 
     public long getId() {
         return id;
     }
 
-    public long getCustomerId() {
-        return customerId;
+    public CustomerJPAEntity getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(long customerId) {
-        this.customerId = customerId;
+    public void setCustomer(CustomerJPAEntity customer) {
+        this.customer = customer;
     }
 
-    public long getDeviceId() {
-        return deviceId;
+    public DeviceJPAEntity getDevice() {
+        return device;
     }
 
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
+    public void setDevice(DeviceJPAEntity device) {
+        this.device = device;
     }
 
     public String getIssueNotes() {

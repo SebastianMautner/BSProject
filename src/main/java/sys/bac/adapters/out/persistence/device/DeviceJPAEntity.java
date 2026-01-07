@@ -16,9 +16,6 @@ public class DeviceJPAEntity {
     private long id;
 
     @Column(nullable = false)
-    private long customerId;
-
-    @Column(nullable = false)
     private String serialNumber;
 
     private String type;
@@ -31,17 +28,16 @@ public class DeviceJPAEntity {
     @OneToMany(mappedBy = "device")
     private List<OrderJPAEntity> orders = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customerId", referencedColumnName = "customerId",
-                insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customerId")
     private CustomerJPAEntity customer;
 
     public DeviceJPAEntity() {}
 
     public long getId() { return id; }
 
-    public long getCustomerId() { return customerId; }
-    public void setCustomerId(long customerId) { this.customerId = customerId; }
+    public void setCustomer(CustomerJPAEntity customer) {this.customer = customer;}
+    public CustomerJPAEntity getCustomer() { return customer; }
 
     public String getSerialNumber() { return serialNumber; }
     public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }

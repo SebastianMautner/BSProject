@@ -15,6 +15,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
+import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.device.Device;
 import sys.bac.application.domain.results.LongResult;
@@ -26,7 +27,8 @@ import sys.bac.application.port.out.DeviceRepository;
 @ApplicationScoped
 public class DeviceJpaAdapter implements DeviceRepository {
     
-    private final Mapper mapper = new Mapper();
+    @Inject
+    private Mapper mapper;
     
     @Inject
     private EntityManager eM;
@@ -58,7 +60,8 @@ public class DeviceJpaAdapter implements DeviceRepository {
                     cQ.where(cB.or(predicates.toArray(new Predicate[0])));
                 }
             }
-            
+            cQ.orderBy(cB.asc(root.get("id")));
+
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
             .setMaxResults(size)
@@ -92,9 +95,12 @@ public class DeviceJpaAdapter implements DeviceRepository {
         try {
             DeviceJPAEntity entity = mapper.toJPA(device);
             eM.persist(entity);
-            result.setResult(mapper.toDevice(entity));
-        } catch (Exception e) {
+            eM.flush();
+            result.setResult(mapper.toDevice(entity));    
+        }
+         catch (Exception e) {
             result.setError(500, e.getMessage());
+            e.printStackTrace();
         }
         return result;
     }
@@ -117,16 +123,14 @@ public class DeviceJpaAdapter implements DeviceRepository {
         NoContentResult result = new NoContentResult();
         try {
             DeviceJPAEntity entity = eM.find(DeviceJPAEntity.class, id.getId());
-            eM.detach(entity);
             
-            entity.setCustomerId(device.getCustomerId());
+            entity.setCustomer(eM.getReference(CustomerJPAEntity.class, device.getCustomerId()));
             entity.setSerialNumber(device.getSerialNumber());
             entity.setType(device.getType());
             entity.setBrand(device.getBrand());
             entity.setModel(device.getModel());
             entity.setNotes(device.getNotes());
             
-            eM.merge(entity);
         } catch (Exception e) {
             result.setError(500, e.getMessage());
         }

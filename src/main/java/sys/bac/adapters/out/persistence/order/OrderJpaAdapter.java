@@ -15,6 +15,8 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
+import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
+import sys.bac.adapters.out.persistence.device.DeviceJPAEntity;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
 import sys.bac.application.domain.results.LongResult;
@@ -26,7 +28,8 @@ import sys.bac.application.port.out.OrderRepository;
 @ApplicationScoped
 public class OrderJpaAdapter implements OrderRepository {
     
-    private final Mapper mapper = new Mapper();
+    @Inject
+    private  Mapper mapper;
     
     @Inject
     private EntityManager eM;
@@ -57,7 +60,8 @@ public class OrderJpaAdapter implements OrderRepository {
                     cQ.where(cB.or(predicates.toArray(new Predicate[0])));
                 }
             }
-            
+            cQ.orderBy(cB.asc(root.get("id")));
+
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
             .setMaxResults(size)
@@ -76,6 +80,10 @@ public class OrderJpaAdapter implements OrderRepository {
     @Override
     public OrderResult getOrderById(LongId id) {
         OrderResult result = new OrderResult();
+        if (id == null) {
+            result.setError(500, "id is null.");
+            return result;            
+        }
         try {
             result = mapper.toOrderResult(eM.find(OrderJPAEntity.class, id.getId()));
         } 
@@ -89,10 +97,17 @@ public class OrderJpaAdapter implements OrderRepository {
     @Override
     public OrderResult create(Order order) {
         OrderResult result = new OrderResult();
+        if (order == null) {
+            result.setError(500, "Order is null");
+            return result;
+        }
         try {
             OrderJPAEntity entity = mapper.toJPA(order);
             eM.persist(entity);
+            eM.flush();
             result.setResult(mapper.toOrder(entity));
+        // } catch(IllegalArgumentException e) {
+            // result.setError(422, "No matching entity ");
         } catch (Exception e) {
             result.setError(500, e.getMessage());
         }
@@ -118,16 +133,14 @@ public class OrderJpaAdapter implements OrderRepository {
         NoContentResult result = new NoContentResult();
         try {
             OrderJPAEntity entity = eM.find(OrderJPAEntity.class, id.getId());
-            eM.detach(entity);
-            entity.setCustomerId(order.getCustomerId());
-            entity.setDeviceId(order.getDeviceId());
+            entity.setCustomer(eM.getReference(CustomerJPAEntity.class, order.getCustomerId()));
+            entity.setDevice(eM.getReference(DeviceJPAEntity.class, order.getDeviceId()));
             entity.setIssueNotes(order.getIssueNotes());
             entity.setReceivedAt(order.getReceivedAt());
             entity.setCompletion(order.getCompletion());
             entity.setCostEstimation(order.getCostEstimation());
             entity.setFinalCost(order.getFinalCost());
             entity.setStatus(order.getStatus());
-            eM.merge(entity);
         } 
         catch (Exception e) {
             result.setError(500, e.getMessage());
