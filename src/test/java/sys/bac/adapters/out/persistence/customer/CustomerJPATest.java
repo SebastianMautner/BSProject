@@ -26,6 +26,7 @@ public class CustomerJPATest {
     CustomerRepository cR;
     
     @Test
+    @TestTransaction
     public void CreateErrorTest() {
         CustomerResult result = cR.create(null);
         assertTrue(result.hasError());
@@ -81,6 +82,7 @@ public class CustomerJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIErrorTest() {
         CustomerResult result = cR.getCustomerById(null);
         assertTrue(result.hasError());
@@ -88,6 +90,7 @@ public class CustomerJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIEmptyTest() {
         CustomerResult result = cR.getCustomerById(new LongId(-1));
         assertTrue(result.isEmpty());
@@ -119,6 +122,7 @@ public class CustomerJPATest {
     }
 
     @Test
+    @TestTransaction
     public void updateError() {
         NoContentResult result = cR.update(null, null);
         assertTrue(result.hasError());
@@ -136,6 +140,7 @@ public class CustomerJPATest {
     }
 
     @Test
+    @TestTransaction
     public void countErrorTest() {
         LongResult result = cR.count(null);
         assertTrue(result.hasError());

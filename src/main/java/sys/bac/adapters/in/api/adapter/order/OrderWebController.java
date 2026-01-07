@@ -149,7 +149,7 @@ public class OrderWebController {
                 
                 return Response.status(Response.Status.CREATED)
                 .cacheControl(noStore())
-                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Location", new Link(Link.orders.getHref() + "/" + result.getId(), "getOrder", "application/json").getHeaderHref(uriInfo.getBaseUri().toString()))
                 .build();
         }
         

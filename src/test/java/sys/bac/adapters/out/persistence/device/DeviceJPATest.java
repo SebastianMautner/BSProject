@@ -30,6 +30,7 @@ public class DeviceJPATest {
     @Inject CustomerRepository cR;
 
     @Test
+    @TestTransaction
     public void CreateErrorTest() {
         DeviceResult result = dR.create(null);
         assertTrue(result.hasError());
@@ -47,6 +48,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getAllErrorTest() {
         JpaDevicesResult result = dR.getAllDevices("", -1, -1);
         assertTrue(result.hasError());
@@ -94,6 +96,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIErrorTest() {
         DeviceResult result = dR.getDeviceById(null);
         assertTrue(result.hasError());
@@ -101,6 +104,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIEmptyTest() {
         DeviceResult result = dR.getDeviceById(new LongId(-1));
         assertTrue(result.isEmpty());
@@ -117,6 +121,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void deleteErrorTest() {
         NoContentResult result = dR.delete(null);
         assertTrue(result.hasError());
@@ -136,6 +141,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void updateError() {
         NoContentResult result = dR.update(null, null);
         assertTrue(result.hasError());
@@ -155,6 +161,7 @@ public class DeviceJPATest {
     }
     
     @Test
+    @TestTransaction
     public void countErrorTest() {
         LongResult result = dR.count(null);
         assertTrue(result.hasError());

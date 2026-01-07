@@ -137,7 +137,7 @@ public class DeviceWebController {
         DeviceDTO result = dSA.createDevice(device);
         
         return Response.status(Response.Status.CREATED)
-        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Location", new Link(Link.devices.getHref() + "/" + result.getId(), "getDevice", "application/json").getHeaderHref(uriInfo.getBaseUri().toString()))
         .cacheControl(noStore())
         .build();
     }

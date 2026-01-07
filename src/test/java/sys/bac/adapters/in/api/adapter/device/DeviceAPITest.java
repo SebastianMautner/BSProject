@@ -41,7 +41,7 @@ public class DeviceAPITest {
         .then()
         .statusCode(201)
         .header("Cache-Control", "no-cache, no-transform, no-store")
-        .header("Location", "<http://localhost:8081/devices/1>;rel=\"getDevice\";type=\"application/json\"")
+        .header("Location", "http://localhost:8081/devices/1")
         .header("content-length", "0");
     }
     

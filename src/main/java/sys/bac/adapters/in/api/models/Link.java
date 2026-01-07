@@ -23,7 +23,7 @@ public class Link {
         return href;
     }
     
-    private String getHeaderHref(String uri) {
+    public String getHeaderHref(String uri) {
         return uri + href;
     }
     

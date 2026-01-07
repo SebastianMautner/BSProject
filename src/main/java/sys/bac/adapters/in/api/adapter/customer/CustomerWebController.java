@@ -146,7 +146,7 @@ public class CustomerWebController {
         CustomerDTO result = cSA.createCustomer(customer);
         return Response.status(Response.Status.CREATED)
         .cacheControl(noStore())
-        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderHref(uriInfo.getBaseUri().toString())).build();
     }
     
     @PUT

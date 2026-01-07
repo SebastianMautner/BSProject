@@ -59,6 +59,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getAllErrorTest() {
         JpaOrdersResult result = oR.getAllOrders("", -1, -1);
         assertTrue(result.hasError());
@@ -115,6 +116,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIErrorTest() {
         OrderResult result = oR.getOrderById(null);
         assertTrue(result.hasError());
@@ -122,6 +124,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void getBIEmptyTest() {
         OrderResult result = oR.getOrderById(new LongId(-1));
         assertTrue(result.isEmpty());
@@ -141,6 +144,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void deleteErrorTest() {
         NoContentResult result = oR.delete(null);
         assertTrue(result.hasError());
@@ -163,6 +167,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void updateError() {
         NoContentResult result = oR.update(null, null);
         assertTrue(result.hasError());
@@ -185,6 +190,7 @@ public class OrderJPATest {
     }
     
     @Test
+    @TestTransaction
     public void countErrorTest() {
         LongResult result = oR.count(null);
         assertTrue(result.hasError());
