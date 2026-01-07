@@ -146,7 +146,8 @@ public class CustomerWebController {
         CustomerDTO result = cSA.createCustomer(customer);
         return Response.status(Response.Status.CREATED)
         .cacheControl(noStore())
-        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "getCustomer", "application/json").getHeaderHref(uriInfo.getBaseUri().toString())).build();
+        .header("Location", new Link(Link.customers.getHref() + "/" + result.getId(), "", "").getHeaderHref(uriInfo.getBaseUri().toString()))
+        .build();
     }
     
     @PUT
@@ -156,7 +157,8 @@ public class CustomerWebController {
         cSA.updateCustomer(id, customer);
         return Response.noContent()
         .cacheControl(noStore())
-        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+        .header("Link", new Link (Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .build();
     }
     
     @DELETE
