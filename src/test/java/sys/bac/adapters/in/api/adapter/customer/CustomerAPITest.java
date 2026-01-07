@@ -372,4 +372,3 @@ public class CustomerAPITest {
             .header("Link", "<http://localhost:8081/customers>;rel=\"getAllCustomers\";type=\"application/json\"");
         }
     }
-    

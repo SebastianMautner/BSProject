@@ -24,12 +24,12 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
-import org.jboss.logging.Logger;
+// import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class DeviceServiceAdapter {
 
-    private static final Logger LOG = Logger.getLogger(DeviceServiceAdapter.class);
+    // private static final Logger LOG = Logger.getLogger(DeviceServiceAdapter.class);
 
     private final Mapper mapper = new Mapper();
 
@@ -41,7 +41,7 @@ public class DeviceServiceAdapter {
 
     @CacheResult(cacheName = "devices-list")
     public DevicesApiResult getDevices(String query, int offset, int size) {
-        LOG.infof("CACHE-TEST: getDevices EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
+        // LOG.infof("CACHE-TEST: getDevices EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
         DevicesResult devices = getDevices.findDevices(query, offset, size);
         if(devices.hasError()) {
             throw new InternalServerErrorException(devices.getMessage());
@@ -55,7 +55,7 @@ public class DeviceServiceAdapter {
 
     @CacheResult(cacheName = "device-by-id")
     public DeviceDTO getDeviceById(@CacheKey long id) {
-        LOG.infof("CACHE-TEST: getDeviceById EXECUTED for id=%d", id);
+        // LOG.infof("CACHE-TEST: getDeviceById EXECUTED for id=%d", id);
         LongId dId = new LongId(id);
         DeviceResult res = getDeviceById.loadDeviceById(dId);
         if (res.getErrorCode() == 404) {
@@ -70,7 +70,7 @@ public class DeviceServiceAdapter {
 
     @CacheInvalidateAll(cacheName = "devices-list")
     public DeviceDTO createDevice(DeviceDTO dto) {
-        LOG.infof("CREATE device → cache invalidated");
+        // LOG.infof("CREATE device → cache invalidated");
         if (dto == null) {
             throw new BadRequestException("Body should contain the new Object");
         }
@@ -84,7 +84,7 @@ public class DeviceServiceAdapter {
     @CacheInvalidate(cacheName = "device-by-id")
     @CacheInvalidateAll(cacheName = "devices-list")
     public void updateDevice(@CacheKey long id, DeviceDTO dto) {
-        LOG.infof("UPDATE device id=%d → cache invalidated", id);
+        // LOG.infof("UPDATE device id=%d → cache invalidated", id);
         if (dto == null) {
             throw new BadRequestException("Body should contain the new Object");
         }
@@ -100,7 +100,7 @@ public class DeviceServiceAdapter {
     @CacheInvalidate(cacheName = "device-by-id")
     @CacheInvalidateAll(cacheName = "devices-list")
     public void deleteDevice(@CacheKey long id) {
-        LOG.infof("DELETE device id=%d → cache invalidated", id);
+        // LOG.infof("DELETE device id=%d → cache invalidated", id);
         NoContentResult result = deleteDevice.deleteDevice(new LongId(id));
         if (result.getErrorCode() == 404) {
             throw new NotFoundException();

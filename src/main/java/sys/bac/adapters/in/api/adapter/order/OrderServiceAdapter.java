@@ -24,12 +24,12 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
-import org.jboss.logging.Logger;
+// import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class OrderServiceAdapter {
 
-    private static final Logger LOG = Logger.getLogger(OrderServiceAdapter.class);
+    // private static final Logger LOG = Logger.getLogger(OrderServiceAdapter.class);
     
     @Inject
     GetOrderByIdUseCase getOrderByIdUC;
@@ -50,7 +50,7 @@ public class OrderServiceAdapter {
     
     @CacheResult(cacheName = "order-by-id")
     public OrderDTO getOrderById(@CacheKey long id) {
-        LOG.infof("CACHE-TEST: getOrderById EXECUTED for id=%d", id);
+        // LOG.infof("CACHE-TEST: getOrderById EXECUTED for id=%d", id);
         LongId oId = new LongId(id);
         OrderResult res = getOrderByIdUC.loadOrderById(oId);
         if (res.getErrorCode() == 404) {
@@ -65,7 +65,7 @@ public class OrderServiceAdapter {
 
     @CacheResult(cacheName = "orders-list")
     public OrdersApiResult getOrders(String query, int offset, int size) {
-        LOG.infof("CACHE-TEST: getOrders EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
+        // LOG.infof("CACHE-TEST: getOrders EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
         OrdersResult orders = getOrdersUC.findOrders(query, offset, size);
         if(orders.hasError()) {
             throw new InternalServerErrorException(orders.getMessage());
@@ -79,7 +79,7 @@ public class OrderServiceAdapter {
 
     @CacheInvalidateAll(cacheName = "orders-list")
     public OrderDTO createOrder(OrderDTO dto) {
-        LOG.infof("CREATE order → cache invalidated");
+        // LOG.infof("CREATE order → cache invalidated");
         if (dto == null) {
             throw new BadRequestException("Body should contain the new Object");
         }
@@ -93,7 +93,7 @@ public class OrderServiceAdapter {
     @CacheInvalidate(cacheName = "order-by-id")
     @CacheInvalidateAll(cacheName = "orders-list")
     public void updateOrder(@CacheKey long id, OrderDTO dto) {  
-        LOG.infof("UPDATE order id=%d → cache invalidated", id);
+        // LOG.infof("UPDATE order id=%d → cache invalidated", id);
         if (dto == null) {
             throw new BadRequestException("Body should contain the new Object");
         }
@@ -109,7 +109,7 @@ public class OrderServiceAdapter {
     @CacheInvalidate(cacheName = "order-by-id")
     @CacheInvalidateAll(cacheName = "orders-list")
     public void deleteOrder(@CacheKey long id) {
-        LOG.infof("DELETE order id=%d → cache invalidated", id);
+        // LOG.infof("DELETE order id=%d → cache invalidated", id);
         LongId oId = new LongId(id);
         NoContentResult result= deleteOrderUC.deleteOrder(oId);
         if (result.getErrorCode() == 404) {
