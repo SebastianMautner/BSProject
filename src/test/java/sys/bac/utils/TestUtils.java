@@ -31,12 +31,14 @@ public class TestUtils {
     @Transactional
     public void clearDevices() {
         eM.createQuery("DELETE FROM DeviceJPAEntity").executeUpdate();
+        clearCustomers();
         cId = -1;
     }
 
     @Transactional
     public void clearOrders() {
         eM.createQuery("DELETE FROM OrderJPAEntity").executeUpdate();
+        clearDevices();
         cId = -1;
     }
 

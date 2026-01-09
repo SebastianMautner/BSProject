@@ -43,7 +43,7 @@ public class DispatcherService {
     }
 
     @GET
-    @Path("id")
+    @Path("{id}")
     public void ErrorGet() {
         throw new NotAllowedException("Only Get is allowed.");
     }
