@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -158,22 +159,35 @@ public class OrderIT {
         @Test
         @TestTransaction
         public void updateOrder204() {
-            String location = 
-            given().contentType(ContentType.JSON)
-            .body("{\"customerId\":" + cId + ", \"deviceId\":" + dId + ", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-12-30\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
-            .when().post("/orders")
-            .then().statusCode(201)
-            .extract().header("Location");
+
+            String location =
+                given().contentType(ContentType.JSON)
+                .body("{\"customerId\":" + cId + ", \"deviceId\":" + dId + ", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-12-30\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
+                .when().post("/orders")
+                .then().statusCode(201)
+                .extract().header("Location");
+
             int id = Location.extractId(location, "orders");
-            
+
+            String etag =
+                given()
+                .when()
+                    .get("/orders/" + id)
+                .then()
+                    .statusCode(200)
+                    .header("ETag", notNullValue())
+                    .extract()
+                    .header("ETag");
+
             given().contentType(ContentType.JSON)
-            .body("{\"customerId\":" + cId + ", \"deviceId\":" + dId + ", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-11-29\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
+                .header("If-Match", etag)
+                .body("{\"customerId\":" + cId + ", \"deviceId\":" + dId + ", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-11-29\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
             .when()
-            .put("/orders/" + id)
+                .put("/orders/" + id)
             .then()
-            .statusCode(204)
-            .header("Cache-control", "no-cache, no-transform, no-store")
-            .header("Link", "<http://localhost:8081/orders/" + id + ">;rel=\"getOrder\";type=\"application/json\"");
+                .statusCode(204)
+                .header("Cache-control", "no-cache, no-transform, no-store")
+                .header("Link", "<http://localhost:8081/orders/" + id + ">;rel=\"getOrder\";type=\"application/json\"");
         }
         
         @Test

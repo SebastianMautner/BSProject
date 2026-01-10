@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -90,14 +90,83 @@ public class DeviceAPITest {
     
     @Test
     public void updateDevice204() {
+
+        when(dSA.getDeviceById(eq(1L)))
+                .thenReturn(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"));
+
+        String etag =
+                given().contentType(ContentType.JSON)
+                        .when()
+                        .get("/devices/" + 1)
+                        .then()
+                        .statusCode(200)
+                        .header("ETag", notNullValue())
+                        .extract()
+                        .header("ETag");
+
+
         given().contentType(ContentType.JSON)
-        .body("{\"customerId\":1, \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
-        .when()
-        .put("/devices/" + 1)
-        .then()
-        .statusCode(204)
-        .header("Cache-control", "no-cache, no-transform, no-store")
-        .header("Link", "<http://localhost:8081/devices/1>;rel=\"getDevice\";type=\"application/json\"");
+                .header("If-Match", etag)
+                .body("{\"customerId\":1, \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
+                .when()
+                .put("/devices/" + 1)
+                .then()
+                .statusCode(204)
+                .header("Cache-control", "no-cache, no-transform, no-store")
+                .header("Link", "<http://localhost:8081/devices/1>;rel=\"getDevice\";type=\"application/json\"");
+    }
+
+
+    @Test
+    public void conditionalGet304_whenIfNoneMatchMatches() {
+
+        when(dSA.getDeviceById(eq(1L)))
+                .thenReturn(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"));
+
+
+        String etag =
+                given()
+                        .when()
+                        .get("/devices/" + 1)
+                        .then()
+                        .statusCode(200)
+                        .header("ETag", notNullValue())
+                        .extract()
+                        .header("ETag");
+
+
+        given()
+                .header("If-None-Match", etag)
+                .when()
+                .get("/devices/" + 1)
+                .then()
+                .statusCode(304)
+                .body(is(emptyOrNullString()));
+    }
+
+    @Test
+    public void conditionalPut428_whenIfMatchMissing() {
+        given().contentType(ContentType.JSON)
+                .body("{\"customerId\":1, \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
+                .when()
+                .put("/devices/" + 1)
+                .then()
+                .statusCode(428);
+    }
+
+    @Test
+    public void conditionalPut412_whenIfMatchWrong() {
+
+        when(dSA.getDeviceById(eq(1L)))
+                .thenReturn(new DeviceDTO(1, 1L, "123", "Phone", "Apple", "iPhone 17 Pro Max", "Cracked Screen"));
+
+        given().contentType(ContentType.JSON)
+                .header("If-Match", "W/\"invalid-etag\"")
+                .body("{\"customerId\":1, \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
+                .when()
+                .put("/devices/" + 1)
+                .then()
+                .statusCode(412);
     }
     
     @Test

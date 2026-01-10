@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -92,7 +92,22 @@ public class OrderAPITest {
     
     @Test
     public void updateOrder204() {
+
+        when(oSA.getOrderById(eq(1L)))
+        .thenReturn(new OrderDTO(1, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED));
+
+        String etag =
         given().contentType(ContentType.JSON)
+        .when()
+        .get("/orders/" + 1)
+        .then()
+        .statusCode(200)
+        .header("ETag", notNullValue())
+        .extract()
+        .header("ETag");
+
+        given().contentType(ContentType.JSON)
+        .header("If-Match", etag)
         .body("{\"customerId\":1, \"deviceId\":\"1\", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-12-30\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
         .when()
         .put("/orders/" + 1)
@@ -100,6 +115,55 @@ public class OrderAPITest {
         .statusCode(204)
         .header("Cache-control", "no-cache, no-transform, no-store")
         .header("Link", "<http://localhost:8081/orders/1>;rel=\"getOrder\";type=\"application/json\"");
+    }
+
+
+    @Test
+    public void conditionalGet304_whenIfNoneMatchMatches() {
+        when(oSA.getOrderById(eq(1L)))
+        .thenReturn(new OrderDTO(1, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED));
+
+        String etag =
+        given()
+        .when()
+        .get("/orders/" + 1)
+        .then()
+        .statusCode(200)
+        .header("ETag", notNullValue())
+        .extract()
+        .header("ETag");
+
+        given()
+        .header("If-None-Match", etag)
+        .when()
+        .get("/orders/" + 1)
+        .then()
+        .statusCode(304);
+    }
+
+    @Test
+    public void conditionalPut428_whenIfMatchMissing() {
+        given().contentType(ContentType.JSON)
+        .body("{\"customerId\":1, \"deviceId\":\"1\", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-12-30\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
+        .when()
+        .put("/orders/" + 1)
+        .then()
+        .statusCode(428);
+    }
+
+    @Test
+    public void conditionalPut412_whenIfMatchWrong() {
+
+        when(oSA.getOrderById(eq(1L)))
+        .thenReturn(new OrderDTO(1, 1, 1, "Cracked Screen", LocalDate.parse("2020-12-30"), 100, OrderStatus.RECEIVED));
+
+        given().contentType(ContentType.JSON)
+        .header("If-Match", "W/\"invalid-etag\"")
+        .body("{\"customerId\":1, \"deviceId\":\"1\", \"issueNotes\":\"Cracked Screen\", \"receivedAt\":\"2020-12-30\", \"costEstimation\":100, \"status\":\"RECEIVED\"}")
+        .when()
+        .put("/orders/" + 1)
+        .then()
+        .statusCode(412);
     }
     
     @Test

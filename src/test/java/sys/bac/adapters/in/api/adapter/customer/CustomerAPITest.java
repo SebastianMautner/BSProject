@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,17 +87,80 @@ public class CustomerAPITest {
             .header("Link", "<http://localhost:8081/customers>;rel=\"getAllCustomers\";type=\"application/json\"");
         }
         
-        @Test
-        public void updateCustomer204() {
-            given().contentType(ContentType.JSON)
-            .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
-            .when()
-            .put("/customers/" + 1)
-            .then()
-            .statusCode(204)
-            .header("Cache-control", "no-cache, no-transform, no-store")
-            .header("Link", "<http://localhost:8081/customers/1>;rel=\"getCustomer\";type=\"application/json\"");
-        }
+            @Test
+    public void updateCustomer204() {
+
+        when(cSA.getCustomerById(eq(1L)))
+        .thenReturn(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 123 12345678"));
+
+        String etag =
+        given().contentType(ContentType.JSON)
+        .when()
+        .get("/customers/" + 1)
+        .then()
+        .statusCode(200)
+        .header("ETag", notNullValue())
+        .extract()
+        .header("ETag");
+
+        given().contentType(ContentType.JSON)
+        .header("If-Match", etag)
+        .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
+        .when()
+        .put("/customers/" + 1)
+        .then()
+        .statusCode(204)
+        .header("Cache-control", "no-cache, no-transform, no-store")
+        .header("Link", "<http://localhost:8081/customers/1>;rel=\"getCustomer\";type=\"application/json\"");
+    }
+
+    @Test
+    public void conditionalGet304_whenIfNoneMatchMatches() {
+        when(cSA.getCustomerById(eq(1L)))
+        .thenReturn(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 123 12345678"));
+
+        String etag =
+        given()
+        .when()
+        .get("/customers/" + 1)
+        .then()
+        .statusCode(200)
+        .header("ETag", notNullValue())
+        .extract()
+        .header("ETag");
+
+        given()
+        .header("If-None-Match", etag)
+        .when()
+        .get("/customers/" + 1)
+        .then()
+        .statusCode(304);
+    }
+
+    @Test
+    public void conditionalPut428_whenIfMatchMissing() {
+        given().contentType(ContentType.JSON)
+        .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
+        .when()
+        .put("/customers/" + 1)
+        .then()
+        .statusCode(428);
+    }
+
+    @Test
+    public void conditionalPut412_whenIfMatchWrong() {
+
+        when(cSA.getCustomerById(eq(1L)))
+        .thenReturn(new CustomerDTO(1, "Bond", "James", "test@test.de", "+44 123 12345678"));
+
+        given().contentType(ContentType.JSON)
+        .header("If-Match", "W/\"invalid-etag\"")
+        .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
+        .when()
+        .put("/customers/" + 1)
+        .then()
+        .statusCode(412);
+    }
         
         @Test
         public void getCustomersEmpty200() {

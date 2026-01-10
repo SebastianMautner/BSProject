@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.notNullValue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,22 +146,35 @@ public class CustomerIT {
         @Test
         @TestTransaction
         public void updateCustomer204() {
-            String location = 
-            given().contentType(ContentType.JSON)
-            .body("{\"surname\":\"Bond\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
-            .when().post("/customers")
-            .then().statusCode(201)
-            .extract().header("Location");
+
+            String location =
+                given().contentType(ContentType.JSON)
+                .body("{\"surname\":\"Bond\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
+                .when().post("/customers")
+                .then().statusCode(201)
+                .extract().header("Location");
+
             int id = Location.extractId(location, "customers");
-            
+
+            String etag =
+                given()
+                .when()
+                    .get("/customers/" + id)
+                .then()
+                    .statusCode(200)
+                    .header("ETag", notNullValue())
+                    .extract()
+                    .header("ETag");
+
             given().contentType(ContentType.JSON)
-            .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
+                .header("If-Match", etag)
+                .body("{\"surname\":\"Moneypenny\", \"name\":\"James\", \"email\":\"test@test.co.uk\", \"phone\":\"+44 12312345678\"}")
             .when()
-            .put("/customers/" + id)
+                .put("/customers/" + id)
             .then()
-            .statusCode(204)
-            .header("Cache-control", "no-cache, no-transform, no-store")
-            .header("Link", "<http://localhost:8081/customers/" + id + ">;rel=\"getCustomer\";type=\"application/json\"");
+                .statusCode(204)
+                .header("Cache-control", "no-cache, no-transform, no-store")
+                .header("Link", "<http://localhost:8081/customers/" + id + ">;rel=\"getCustomer\";type=\"application/json\"");
         }
         
         @Test

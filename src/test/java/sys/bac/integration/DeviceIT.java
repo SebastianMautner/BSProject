@@ -10,6 +10,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -151,23 +152,37 @@ public class DeviceIT {
         @Test
         @TestTransaction
         public void updateDevice204() {
-            String location = 
-            given().contentType(ContentType.JSON)
-            .body("{\"customerId\":" + cId + ", \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
-            .when().post("/devices")
-            .then().statusCode(201)
-            .extract().header("Location");
+
+            String location =
+                given().contentType(ContentType.JSON)
+                .body("{\"customerId\":" + cId + ", \"serialNumber\":\"123\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
+                .when().post("/devices")
+                .then().statusCode(201)
+                .extract().header("Location");
+
             int id = Location.extractId(location, "devices");
-            
+
+            String etag =
+                given()
+                .when()
+                    .get("/devices/" + id)
+                .then()
+                    .statusCode(200)
+                    .header("ETag", notNullValue())
+                    .extract()
+                    .header("ETag");
+
             given().contentType(ContentType.JSON)
-            .body("{\"customerId\":" + cId + ", \"serialNumber\":\"231\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
+                .header("If-Match", etag)
+                .body("{\"customerId\":" + cId + ", \"serialNumber\":\"231\", \"type\":\"Phone\", \"brand\":\"Apple\", \"notes\":\"Cracked Screen\", \"model\":\"iPhone 17 Pro Max\"}")
             .when()
-            .put("/devices/" + id)
+                .put("/devices/" + id)
             .then()
-            .statusCode(204)
-            .header("Cache-control", "no-cache, no-transform, no-store")
-            .header("Link", "<http://localhost:8081/devices/" + id + ">;rel=\"getDevice\";type=\"application/json\"");
+                .statusCode(204)
+                .header("Cache-control", "no-cache, no-transform, no-store")
+                .header("Link", "<http://localhost:8081/devices/" + id + ">;rel=\"getDevice\";type=\"application/json\"");
         }
+
         
         @Test
         @TestTransaction
