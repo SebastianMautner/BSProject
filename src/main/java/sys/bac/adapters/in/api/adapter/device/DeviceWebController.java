@@ -145,12 +145,37 @@ public class DeviceWebController {
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device) {
+    public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device, @HeaderParam("If-Match") String ifMatch) {
+        if (ifMatch == null || ifMatch.isBlank()) {
+            return Response.status(428)
+                    .cacheControl(noStore())
+                    .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
+        DeviceDTO current = dSA.getDeviceById(id);
+        current = addSelfLink(current, "getDeviceWithId" + current.getId());
+        EntityTag currentEtag = etagOf(current);
+
+        Response.ResponseBuilder precond = request.evaluatePreconditions(currentEtag);
+        if (precond != null) {
+             return precond
+                    .cacheControl(noStore())
+                    .tag(currentEtag)
+                    .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                    .build();
+        }
         dSA.updateDevice(id, device);
+
+        DeviceDTO updated = dSA.getDeviceById(id);
+        updated = addSelfLink(updated, "getDeviceWithId" + updated.getId());
+        EntityTag newEtag = etagOf(updated);
+
         return Response.noContent()
-        .cacheControl(noStore())
-        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-        .build();
+                .cacheControl(noStore())
+                .tag(newEtag)
+                .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .build();
     }
     
     @DELETE

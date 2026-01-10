@@ -4,6 +4,7 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
@@ -156,11 +157,37 @@ public class OrderWebController {
         @PUT
         @Path("{id}")
         @Consumes(MediaType.APPLICATION_JSON)
-        public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order) {
+        public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order, @HeaderParam("If-Match") String ifMatch) {
+                if (ifMatch == null || ifMatch.isBlank()) {
+                return Response.status(428)
+                        .cacheControl(noStore())
+                        .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
+                        .type(MediaType.TEXT_PLAIN)
+                        .build();
+                }
+                OrderDTO current = oSA.getOrderById(id);
+                current = addSelfLink(current, "getOrderWithId" + current.getId());
+                EntityTag currentEtag = etagOf(current);
+
+                Response.ResponseBuilder precond = request.evaluatePreconditions(currentEtag);
+                if (precond != null) {
+                return precond
+                        .cacheControl(noStore())
+                        .tag(currentEtag)
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                        .build();
+                }
                 oSA.updateOrder(id, order);
+
+                OrderDTO updated = oSA.getOrderById(id);
+                updated = addSelfLink(updated, "getOrderWithId" + updated.getId());
+                EntityTag newEtag = etagOf(updated);
+
                 return Response.noContent()
-                .cacheControl(noStore())
-                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+                        .cacheControl(noStore())
+                        .tag(newEtag)
+                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                        .build();
         }
         
         @DELETE
