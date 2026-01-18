@@ -40,7 +40,6 @@ public class BadRequestMapper implements ExceptionMapper<BadRequestException>{
         else {
             return Response.status(400)
             .entity(ex.getMessage())
-            .header("HOW", "HowDidYouGetHere")
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         
