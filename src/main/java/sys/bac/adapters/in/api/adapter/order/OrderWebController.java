@@ -37,11 +37,11 @@ public class OrderWebController {
         
         @Inject
         private OrderServiceAdapter oSA;
-
-                
+        
+        
         @Context
         Request request;
-
+        
         private CacheControl defaultGetCacheControl() {
                 CacheControl cc = new CacheControl();
                 cc.setPrivate(true);
@@ -49,15 +49,15 @@ public class OrderWebController {
                 cc.setMustRevalidate(true); 
                 return cc;
         }
-
-
+        
+        
         private CacheControl noStore() {
                 CacheControl cc = new CacheControl();
                 cc.setNoStore(true);
                 cc.setNoCache(true);
                 return cc;
         }
-
+        
         private EntityTag etagOf(Object... parts) {
                 String value = Integer.toHexString(Objects.hash(parts));
                 return new EntityTag(value, true);
@@ -72,24 +72,26 @@ public class OrderWebController {
         public Response getOrderById(@Positive @PathParam("orderId") long id) { 
                 OrderDTO order = oSA.getOrderById(id);
                 order = addSelfLink(order, "getOrderWithId" + order.getId());
-
+                
                 EntityTag etag = etagOf(order);
-
+                
                 Response.ResponseBuilder precond = request.evaluatePreconditions(etag);
                 if (precond != null) {
-                return precond
-                        .cacheControl(defaultGetCacheControl())
-                        .tag(etag)
-                        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
-                        .build();
-                }
-                return Response.ok(order)
+                        return precond
                         .cacheControl(defaultGetCacheControl())
                         .tag(etag)
                         .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
                         .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                         .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                         .build();
+                }
+                return Response.ok(order)
+                .cacheControl(defaultGetCacheControl())
+                .tag(etag)
+                .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "updateOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "deleteOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .build();
         }
         
         @GET
@@ -159,7 +161,7 @@ public class OrderWebController {
         @Consumes(MediaType.APPLICATION_JSON)
         public Response updateOrder(@Positive @PathParam("id") long id, @Valid OrderDTO order, @HeaderParam("If-Match") String ifMatch) {
                 if (ifMatch == null || ifMatch.isBlank()) {
-                return Response.status(428)
+                        return Response.status(428)
                         .cacheControl(noStore())
                         .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
                         .type(MediaType.TEXT_PLAIN)
@@ -168,26 +170,21 @@ public class OrderWebController {
                 OrderDTO current = oSA.getOrderById(id);
                 current = addSelfLink(current, "getOrderWithId" + current.getId());
                 EntityTag currentEtag = etagOf(current);
-
+                
                 Response.ResponseBuilder precond = request.evaluatePreconditions(currentEtag);
                 if (precond != null) {
-                return precond
+                        return precond
                         .cacheControl(noStore())
                         .tag(currentEtag)
                         .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                         .build();
                 }
                 oSA.updateOrder(id, order);
-
-                OrderDTO updated = oSA.getOrderById(id);
-                updated = addSelfLink(updated, "getOrderWithId" + updated.getId());
-                EntityTag newEtag = etagOf(updated);
-
+                
                 return Response.noContent()
-                        .cacheControl(noStore())
-                        .tag(newEtag)
-                        .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                        .build();
+                .cacheControl(noStore())
+                .header("Link", new Link(Link.orders.getHref() + "/" + id, "getOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .build();
         }
         
         @DELETE
@@ -201,7 +198,7 @@ public class OrderWebController {
         }
         
         private OrderDTO addSelfLink(OrderDTO order, String rel) {
-               order.setSelf(new Link(uriInfo.getBaseUri().toString() + "orders" + "/" + order.getId(), rel, "application/json"));
+                order.setSelf(new Link(uriInfo.getBaseUri().toString() + "orders" + "/" + order.getId(), rel, "application/json"));
                 return order;
         }
         
