@@ -70,6 +70,8 @@ public class DeviceWebController {
             .cacheControl(defaultGetCacheControl())
             .tag(etag)
             .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", new Link(Link.devices.getHref() + "/" + id, "updateDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", new Link(Link.devices.getHref() + "/" + id, "deleteDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
             .build();
         }
         
@@ -148,34 +150,29 @@ public class DeviceWebController {
     public Response updateDevice(@Positive @PathParam("id") long id, @Valid DeviceDTO device, @HeaderParam("If-Match") String ifMatch) {
         if (ifMatch == null || ifMatch.isBlank()) {
             return Response.status(428)
-                    .cacheControl(noStore())
-                    .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
-                    .type(MediaType.TEXT_PLAIN)
-                    .build();
+            .cacheControl(noStore())
+            .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
+            .type(MediaType.TEXT_PLAIN)
+            .build();
         }
         DeviceDTO current = dSA.getDeviceById(id);
         current = addSelfLink(current, "getDeviceWithId" + current.getId());
         EntityTag currentEtag = etagOf(current);
-
+        
         Response.ResponseBuilder precond = request.evaluatePreconditions(currentEtag);
         if (precond != null) {
-             return precond
-                    .cacheControl(noStore())
-                    .tag(currentEtag)
-                    .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                    .build();
+            return precond
+            .cacheControl(noStore())
+            .tag(currentEtag)
+            .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+            .build();
         }
         dSA.updateDevice(id, device);
-
-        DeviceDTO updated = dSA.getDeviceById(id);
-        updated = addSelfLink(updated, "getDeviceWithId" + updated.getId());
-        EntityTag newEtag = etagOf(updated);
-
+        
         return Response.noContent()
-                .cacheControl(noStore())
-                .tag(newEtag)
-                .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .build();
+        .cacheControl(noStore())
+        .header("Link", new Link(Link.devices.getHref() + "/" + id, "getDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .build();
     }
     
     @DELETE
@@ -189,8 +186,9 @@ public class DeviceWebController {
     }
     
     private DeviceDTO addSelfLink(DeviceDTO dto, String rel) {
-        dto.setSelf(new Link(uriInfo.getBaseUri().toString() + "devices" + "/" + dto.getId(), rel, "application/json"));
-        return dto;
+        DeviceDTO copy = new DeviceDTO(dto.getId(), dto.getCustomerId(), dto.getSerialNumber(), dto.getType(), dto.getBrand(), dto.getModel(), dto.getNotes());
+        copy.setSelf(new Link(uriInfo.getBaseUri().toString() + "devices" + "/" + dto.getId(), rel, "application/json"));
+        return copy;
     }
     
     @DELETE

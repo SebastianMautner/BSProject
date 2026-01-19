@@ -37,7 +37,6 @@ public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
         }
         else {
             return Response.status(404)
-            .header("How", "How did you get here")
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         

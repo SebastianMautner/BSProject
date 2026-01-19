@@ -37,7 +37,6 @@ public class MethodNotAllowedMapper implements ExceptionMapper<NotAllowedExcepti
         }
         else {
             return Response.status(405)
-            .header("How", "How did you get here")
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         
