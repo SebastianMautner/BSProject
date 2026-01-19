@@ -27,16 +27,16 @@ public class ServerErrorMapper implements ExceptionMapper<InternalServerErrorExc
         if (resourceClass == CustomerWebController.class) {
             return Response.serverError().entity(ex.getMessage()).header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         } else if (resourceClass == OrderWebController.class) {
-            return Response.serverError().header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.serverError().entity(ex.getMessage()).header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if(resourceClass == DeviceWebController.class) {
-            return Response.serverError().header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.serverError().entity(ex.getMessage()).header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.serverError().header("Link", new Link("", "tryDispatcherAgain", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.serverError().entity(ex.getMessage()).header("Link", new Link("", "tryDispatcherAgain", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else {
-            return Response.serverError().header("Class", resourceClass.getName()).header("Link", new Link("", "tryDispatcher", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return Response.serverError().entity(ex.getMessage()).header("Class", resourceClass.getName()).header("Link", new Link("", "tryDispatcher", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         
     }
