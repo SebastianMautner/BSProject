@@ -80,7 +80,9 @@ public class CustomerWebController {
             return precond
             .cacheControl(defaultGetCacheControl())
             .tag(etag)
-            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", new Link(Link.customers.getHref() + "/" + id, "updateCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", new Link(Link.customers.getHref() + "/" + id, "deleteCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
             .build();
         }
         return Response.ok(customer)
@@ -157,34 +159,29 @@ public class CustomerWebController {
     public Response updateCustomer(@Positive @PathParam("id") long id, @Valid CustomerDTO customer, @HeaderParam("If-Match") String ifMatch) {
         if (ifMatch == null || ifMatch.isBlank()) {
             return Response.status(428)
-                    .cacheControl(noStore())
-                    .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
-                    .type(MediaType.TEXT_PLAIN)
-                    .build();
+            .cacheControl(noStore())
+            .entity("Missing If-Match header. Fetch the resource first (GET) and resend PUT with If-Match: <ETag>.")
+            .type(MediaType.TEXT_PLAIN)
+            .build();
         }
         CustomerDTO current = cSA.getCustomerById(id);
         current = addSelfLink(current, "getCustomerWithId" + current.getId());
         EntityTag currentEtag = etagOf(current);
-
+        
         Response.ResponseBuilder precond = request.evaluatePreconditions(currentEtag);
         if (precond != null) {
-             return precond
-                    .cacheControl(noStore())
-                    .tag(currentEtag)
-                    .header("Link", new Link(Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                    .build();
+            return precond
+            .cacheControl(noStore())
+            .tag(currentEtag)
+            .header("Link", new Link(Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+            .build();
         }
         cSA.updateCustomer(id, customer);
-
-        CustomerDTO updated = cSA.getCustomerById(id);
-        updated = addSelfLink(updated, "getCustomerWithId" + updated.getId());
-        EntityTag newEtag = etagOf(updated);
-
+        
         return Response.noContent()
-                .cacheControl(noStore())
-                .tag(newEtag)
-                .header("Link", new Link(Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .build();
+        .cacheControl(noStore())
+        .header("Link", new Link(Link.customers.getHref() + "/" + id, "getCustomer", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .build();
     }
     
     @DELETE
