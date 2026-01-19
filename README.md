@@ -1,13 +1,25 @@
-How to start the tests for this project:
-    1. Navigate to the root directory of the project in a shell (bash, powershell, etc.); Opening the project in an IDE with an integrated shell also works
-    2. Execute the command "mvn verify"; Alternatively ".\mvnw install" (or ./mvnw install, depending on OS) should also work
-    3. All 239 Tests execute
+# Tests
+From the root directory of the project (named 'BSproject'), simply run one of the following two commands in your shell of choice:
+```bash
+mvn verify
+```
+or
+```bash
+./mvnw install
+```
+Both cause all 239 Tests to be executed. Additionally they create the quarkus-run.jar, which is required to actually launch the application.
 
-How to start the application:
-    1. Create "quarkus-run.jar" using "mvn verify" or ".\mvnw install"; should already be done from the tests
-    2. From the root directory of the project execute "java -jar target/quarkus-app/quarkus-run.jar"
-    3. The dispatcher service should now be available at http://localhost:8080/ or http://127.0.0.1:8080/
-
-TODO:
-Video
-Documentation (LateX)
+## Starting the application
+If you haven't done so already, first create the quarkus-run jar file using:
+```powershell
+mvn verify
+```
+or
+```bash
+./mvnw install
+```
+Now the application can be started with:
+```bash
+java -jar target/quarkus-app/quarkus-run.jar
+```
+The dispatcher service of the application should now be available at http://localhost:8080/ or http://127.0.0.1:8080/

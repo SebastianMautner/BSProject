@@ -23,12 +23,9 @@ import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
-// import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class CustomerServiceAdapter {
-
-    // private static final Logger LOG = Logger.getLogger(CustomerServiceAdapter.class);
     
     @Inject
     private GetCustomerByIdUseCase gCBIUC;
@@ -49,7 +46,6 @@ public class CustomerServiceAdapter {
     
     @CacheResult(cacheName = "customer-by-id")
     public CustomerDTO getCustomerById(@CacheKey long id) {
-        // LOG.infof("CACHE-TEST: getCustomerById EXECUTED for id=%d", id);
         LongId cId = new LongId(id);
         CustomerResult customer = gCBIUC.loadCustomerById(cId);
         
@@ -65,7 +61,6 @@ public class CustomerServiceAdapter {
     
     @CacheResult(cacheName = "customers-list")
     public CustomersApiResult getCustomers(String query, int offset, int size) {
-        // LOG.infof("CACHE-TEST: getCustomers EXECUTED for query=%s, offset=%d, size=%d", query, offset, size);
         CustomersResult customers = gCUC.findCustomers(query, offset, size);
         if(customers.hasError()) {
             throw new InternalServerErrorException(customers.getMessage());
@@ -79,7 +74,6 @@ public class CustomerServiceAdapter {
     
     @CacheInvalidateAll(cacheName = "customers-list")
     public CustomerDTO createCustomer(CustomerDTO customer) {
-        // LOG.infof("CREATE customer → cache invalidated");
         if (customer == null) {
             throw new BadRequestException("Body should contain the new Object");
         }
@@ -93,7 +87,6 @@ public class CustomerServiceAdapter {
     @CacheInvalidate(cacheName = "customer-by-id")
     @CacheInvalidateAll(cacheName = "customers-list")
     public void updateCustomer(@CacheKey long id, CustomerDTO customer) {
-        // LOG.infof("UPDATE customer id=%d → cache invalidated", id);
         LongId cId =  new LongId(id);
         if (customer == null) {
             throw new BadRequestException("Body should contain the new Object");
@@ -109,7 +102,6 @@ public class CustomerServiceAdapter {
     @CacheInvalidate(cacheName = "customer-by-id")
     @CacheInvalidateAll(cacheName = "customers-list")
     public void deleteCustomer(@CacheKey long id) {
-        // LOG.infof("DELETE customer id=%d → cache invalidated", id);
         LongId cId = new LongId(id);
         NoContentResult result = dCUC.deleteCustomer(cId);
         if (result.getErrorCode() == 404) {
