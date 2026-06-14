@@ -19,10 +19,7 @@ public class DispatcherService {
 
     @GET
     public Response getPaths() {
-        return Response.ok()
-        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+        return dashboard(Response.ok())
         .build();
     }
 
@@ -46,5 +43,15 @@ public class DispatcherService {
     @Path("{id}")
     public void ErrorGet() {
         throw new NotAllowedException("Only Get is allowed.");
+    }
+
+    private Response.ResponseBuilder dashboard(
+        Response.ResponseBuilder builder) {
+            
+            return builder
+            .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.home.getHeaderLink(uriInfo.getBaseUri().toString()));
     }
 }

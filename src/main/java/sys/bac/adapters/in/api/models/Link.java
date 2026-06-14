@@ -10,7 +10,7 @@ public class Link {
     public static final Link customers = new Link("customers", "getAllCustomers", "application/json");
     public static final Link orders = new Link("orders", "getAllOrders", "application/json");
     public static final Link devices = new Link("devices", "getAllDevices", "application/json");
-    
+    public static final Link home = new Link("home", "getHomepage", "application/json");
     public Link() {}
     
     public Link(String href, String rel, String type) {

@@ -25,19 +25,30 @@ public class ServerErrorMapper implements ExceptionMapper<InternalServerErrorExc
     public Response toResponse(InternalServerErrorException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.serverError().entity(ex.getMessage()).header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.serverError()).entity(ex.getMessage()).header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         } else if (resourceClass == OrderWebController.class) {
-            return Response.serverError().entity(ex.getMessage()).header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.serverError()).entity(ex.getMessage()).header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if(resourceClass == DeviceWebController.class) {
-            return Response.serverError().entity(ex.getMessage()).header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.serverError()).entity(ex.getMessage()).header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.serverError().entity(ex.getMessage()).header("Link", new Link("", "tryDispatcherAgain", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.serverError()).entity(ex.getMessage()).header("Link", new Link("", "tryDispatcherAgain", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else {
-            return Response.serverError().entity(ex.getMessage()).header("Class", resourceClass.getName()).header("Link", new Link("", "tryDispatcher", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.serverError()).entity(ex.getMessage()).header("Class", resourceClass.getName()).header("Link", new Link("", "tryDispatcher", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
-        
+    }
+
+    private Response.ResponseBuilder dashboard(
+        Response.ResponseBuilder builder) {
+            
+            return builder
+            .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link",
+            new Link("/", "dashboard", "application/json")
+            .getHeaderLink(uriInfo.getBaseUri().toString()));
     }
 }

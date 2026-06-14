@@ -66,7 +66,7 @@ public class DeviceWebController {
         
         Response.ResponseBuilder precond = request.evaluatePreconditions(etag);
         if (precond != null) {
-            return precond
+            return dashboard(precond)
             .cacheControl(defaultGetCacheControl())
             .tag(etag)
             .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
@@ -75,7 +75,7 @@ public class DeviceWebController {
             .build();
         }
         
-        return Response.ok(device)
+        return dashboard(Response.ok(device))
         .cacheControl(defaultGetCacheControl())
         .tag(etag)
         .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
@@ -125,10 +125,8 @@ public class DeviceWebController {
             }
             builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
         }
-        return builder
+        return dashboard(builder)
         .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
-        .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
         .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .build();
     }
@@ -205,5 +203,15 @@ public class DeviceWebController {
     @Path("{id}")
     public void ErrorPost() {
         throw new NotAllowedException("No POST for path devices/id");
+    }
+
+    private Response.ResponseBuilder dashboard(
+        Response.ResponseBuilder builder) {
+            
+            return builder
+            .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.home.getHeaderLink(uriInfo.getBaseUri().toString()));
     }
 }

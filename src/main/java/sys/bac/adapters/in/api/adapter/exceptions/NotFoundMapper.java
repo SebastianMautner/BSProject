@@ -23,22 +23,33 @@ public class NotFoundMapper implements ExceptionMapper<NotFoundException>{
     public Response toResponse(NotFoundException ex) {
         Class<?> resourceClass = resource.getResourceClass();
         if (resourceClass == CustomerWebController.class) {
-            return Response.status(404, "Not Found").header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.status(404, "Not Found")).header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == OrderWebController.class) {
-            return Response.status(404, "Not Found").header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.status(404, "Not Found")).header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DeviceWebController.class) {
-            return Response.status(404, "Not Found").header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
+            return dashboard(Response.status(404, "Not Found")).header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else if (resourceClass == DispatcherService.class) {
-            return Response.status(404, "Not Found (There are no resources here, what are you doing?)")
+            return dashboard(Response.status(404, "Not Found (There are no resources here, what are you doing?)"))
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
         else {
-            return Response.status(404)
+            return dashboard(Response.status(404))
             .header("Link", new Link("", "getDispatcherService", "application/json").getHeaderLink(uriInfo.getBaseUri().toString())).build();
         }
-        
+    }
+
+    private Response.ResponseBuilder dashboard(
+        Response.ResponseBuilder builder) {
+            
+            return builder
+            .header("Link", Link.customers.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.devices.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link", Link.orders.getHeaderLink(uriInfo.getBaseUri().toString()))
+            .header("Link",
+            new Link("/", "dashboard", "application/json")
+            .getHeaderLink(uriInfo.getBaseUri().toString()));
     }
 }
