@@ -11,6 +11,8 @@ public interface OrderRepository {
 
     JpaOrdersResult getAllOrders(String query, int offset, int size);
 
+    JpaOrdersResult getAllOrders(String query, String status, int offset, int size);
+
     OrderResult create(Order order);
 
     OrderResult getOrderById(LongId id);
@@ -20,4 +22,6 @@ public interface OrderRepository {
     NoContentResult update(LongId id, Order order);
 
     LongResult count(String query);
+
+    LongResult count(String query, String status);
 }

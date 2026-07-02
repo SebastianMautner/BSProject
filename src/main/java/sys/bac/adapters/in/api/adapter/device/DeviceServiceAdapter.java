@@ -45,7 +45,7 @@ public class DeviceServiceAdapter {
         DevicesApiResult result = new DevicesApiResult(devices.getResult().getResult()
         .stream()
         .map(mapper::toDTO)
-        .collect(Collectors.toList()), devices.getResult().getTotalElements() > offset + size, offset != 0);
+        .collect(Collectors.toList()), devices.getResult().getTotalElements() > offset + size, offset != 0, devices.getResult().getTotalElements());
         return result;
     }
 

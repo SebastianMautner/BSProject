@@ -9,11 +9,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.customer.Customer;
@@ -53,28 +50,13 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<CustomerJPAEntity> cQ = cB.createQuery(CustomerJPAEntity.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<CustomerJPAEntity> entityType = eM.getMetamodel().entity(CustomerJPAEntity.class);
-                for (Attribute<? super CustomerJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query);
 
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             
-            cQ.orderBy(cB.asc(root.get("id")));
+            cQ.orderBy(cB.asc(root.get("customerId")));
             list = eM.createQuery(cQ)
             .setFirstResult(offset)
             .setMaxResults(size)
@@ -136,25 +118,10 @@ public class CustomerJpaAdapter implements CustomerRepository{
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
             Root<CustomerJPAEntity> root = cQ.from(CustomerJPAEntity.class);
-            
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<CustomerJPAEntity> entityType = eM.getMetamodel().entity(CustomerJPAEntity.class);
-                for (Attribute<? super CustomerJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query);
+
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             cQ.select(cB.count(root));
             amount = eM.createQuery(cQ).getSingleResult();
@@ -164,5 +131,45 @@ public class CustomerJpaAdapter implements CustomerRepository{
         }
         result.setResult(amount);
         return result;
+    }
+
+    private List<Predicate> buildSearchPredicates(CriteriaBuilder cB, Root<CustomerJPAEntity> root, String query) {
+        List<Predicate> predicates = new ArrayList<>();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+
+        if(normalizedQuery.isBlank()) {
+            return predicates;
+        }
+
+        Long exactId = extractExactId(normalizedQuery, "id");
+        if(exactId != null) {
+            predicates.add(cB.equal(root.get("customerId"), exactId));
+            return predicates;
+        }
+
+        String pattern = "%" + normalizedQuery + "%";
+        predicates.add(cB.or(
+            cB.like(cB.lower(root.get("surname")), pattern),
+            cB.like(cB.lower(root.get("name")), pattern),
+            cB.like(cB.lower(root.get("eMail")), pattern),
+            cB.like(cB.lower(root.get("phone")), pattern)
+        ));
+        return predicates;
+    }
+
+    private Long extractExactId(String query, String prefix) {
+        String normalized = query.trim().toLowerCase();
+        String prefixed = prefix + ":";
+
+        if(normalized.startsWith(prefixed)) {
+            normalized = normalized.substring(prefixed.length()).trim();
+        } else if(normalized.startsWith("#")) {
+            normalized = normalized.substring(1).trim();
+        }
+
+        if(normalized.matches("\\d+")) {
+            return Long.parseLong(normalized);
+        }
+        return null;
     }
 }

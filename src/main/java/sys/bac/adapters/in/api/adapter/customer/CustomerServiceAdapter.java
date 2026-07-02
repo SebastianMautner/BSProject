@@ -68,7 +68,7 @@ public class CustomerServiceAdapter {
         CustomersApiResult result = new CustomersApiResult(customers.getResult().getResult()
         .stream()
         .map(mapper::toDTO)
-        .collect(Collectors.toList()), customers.getResult().getTotalElements() > offset + size, offset != 0);
+        .collect(Collectors.toList()), customers.getResult().getTotalElements() > offset + size, offset != 0, customers.getResult().getTotalElements());
         return result;
     }
     

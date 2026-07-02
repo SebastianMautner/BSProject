@@ -9,11 +9,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
 import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
 import sys.bac.application.domain.models.LongId;
@@ -41,24 +38,10 @@ public class DeviceJpaAdapter implements DeviceRepository {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<DeviceJPAEntity> cQ = cB.createQuery(DeviceJPAEntity.class);
             Root<DeviceJPAEntity> root = cQ.from(DeviceJPAEntity.class);
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<DeviceJPAEntity> entityType = eM.getMetamodel().entity(DeviceJPAEntity.class);
-                for (Attribute<? super DeviceJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query);
+
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             cQ.orderBy(cB.asc(root.get("id")));
 
@@ -143,25 +126,10 @@ public class DeviceJpaAdapter implements DeviceRepository {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
             Root<DeviceJPAEntity> root = cQ.from(DeviceJPAEntity.class);
-            
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<DeviceJPAEntity> entityType = eM.getMetamodel().entity(DeviceJPAEntity.class);
-                for (Attribute<? super DeviceJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query);
+
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             cQ.select(cB.count(root));
             amount = eM.createQuery(cQ).getSingleResult();
@@ -172,5 +140,51 @@ public class DeviceJpaAdapter implements DeviceRepository {
         result.setResult(amount);
         return result;
     }
-}
 
+    private List<Predicate> buildSearchPredicates(CriteriaBuilder cB, Root<DeviceJPAEntity> root, String query) {
+        List<Predicate> predicates = new ArrayList<>();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+
+        if(normalizedQuery.isBlank()) {
+            return predicates;
+        }
+
+        Long customerId = extractExactId(normalizedQuery, "customer");
+        if(customerId != null && normalizedQuery.startsWith("customer:")) {
+            predicates.add(cB.equal(root.get("customer").get("customerId"), customerId));
+            return predicates;
+        }
+
+        Long exactId = extractExactId(normalizedQuery, "id");
+        if(exactId != null) {
+            predicates.add(cB.equal(root.get("id"), exactId));
+            return predicates;
+        }
+
+        String pattern = "%" + normalizedQuery + "%";
+        predicates.add(cB.or(
+            cB.like(cB.lower(root.get("serialNumber")), pattern),
+            cB.like(cB.lower(root.get("type")), pattern),
+            cB.like(cB.lower(root.get("brand")), pattern),
+            cB.like(cB.lower(root.get("model")), pattern),
+            cB.like(cB.lower(root.get("notes")), pattern)
+        ));
+        return predicates;
+    }
+
+    private Long extractExactId(String query, String prefix) {
+        String normalized = query.trim().toLowerCase();
+        String prefixed = prefix + ":";
+
+        if(normalized.startsWith(prefixed)) {
+            normalized = normalized.substring(prefixed.length()).trim();
+        } else if(normalized.startsWith("#")) {
+            normalized = normalized.substring(1).trim();
+        }
+
+        if(normalized.matches("\\d+")) {
+            return Long.parseLong(normalized);
+        }
+        return null;
+    }
+}

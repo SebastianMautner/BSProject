@@ -10,13 +10,20 @@ public class DevicesApiResult {
 
     private boolean prev;
 
+    private long totalElements;
+
     public DevicesApiResult() {
     }
 
     public DevicesApiResult(List<DeviceDTO> result, boolean next, boolean prev) {
+        this(result, next, prev, result == null ? 0 : result.size());
+    }
+
+    public DevicesApiResult(List<DeviceDTO> result, boolean next, boolean prev, long totalElements) {
         this.result = result;
         this.next = next;
         this.prev = prev;
+        this.totalElements = totalElements;
     }
 
     public List<DeviceDTO> getResult() {
@@ -33,6 +40,14 @@ public class DevicesApiResult {
 
     public boolean prev() {
         return prev;
+    }
+
+    public long getTotalElements() {
+        return totalElements;
+    }
+
+    public void setTotalElements(long totalElements) {
+        this.totalElements = totalElements;
     }
 
     @Override

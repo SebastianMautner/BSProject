@@ -24,6 +24,8 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
@@ -97,47 +99,27 @@ public class OrderWebController {
         @GET
         @Produces(MediaType.APPLICATION_JSON)
         public Response getOrders(@DefaultValue("") @QueryParam("query") String query,
+        @DefaultValue("") @QueryParam("status") String status,
+        @PositiveOrZero @DefaultValue("0") @QueryParam("page") int page,
         @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
         @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
                 size = Math.min(100, size);
+                if (page > 0 && offset == 0) {
+                        offset = page * size;
+                }
                 
-                OrdersApiResult orders = oSA.getOrders(query, offset, size);
+                OrdersApiResult orders = status.isBlank() ? oSA.getOrders(query, offset, size) : oSA.getOrders(query, status, offset, size);
                 orders.setResult(orders.getResult().stream().map(o -> addSelfLink(o, "getOrderWithId" + o.getId())).collect(Collectors.toList()));
                 Response.ResponseBuilder builder = Response.ok(orders.getResult());
-                
-                if(query.isBlank()) {
-                        if (orders.next() && orders.prev()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                                
-                        } else if(orders.next()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                                
-                        } else if(orders.prev()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                        }
-                }
-                else {
-                        if (orders.next() && orders.prev()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                                
-                        } else if(orders.next()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                                
-                        } else if(orders.prev()) {
-                                builder = builder
-                                .header("Link", new Link(Link.orders.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                        }
+                addPaginationHeaders(builder, Link.orders.getHref(), query, status, offset, size, orders.getTotalElements(), orders.next(), orders.prev());
+
+                if(!query.isBlank() || !status.isBlank()) {
                         builder.header("Link", new Link(Link.orders.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
                 }
+
                 return dashboard(builder)
                 .header("Link", new Link(Link.orders.getHref() + "?query={query}", "getNewOrderQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(Link.orders.getHref() + "?status={status}", "getNewOrderStatusFilter", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                 .header("Link", new Link(Link.orders.getHref(), "createOrder", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
                 .build();
         }
@@ -198,6 +180,45 @@ public class OrderWebController {
         private OrderDTO addSelfLink(OrderDTO order, String rel) {
                 order.setSelf(new Link(uriInfo.getBaseUri().toString() + "orders" + "/" + order.getId(), rel, "application/json"));
                 return order;
+        }
+
+        private void addPaginationHeaders(Response.ResponseBuilder builder, String resourceHref, String query, String status, int offset, int size, long totalElements, boolean hasNext, boolean hasPrevious) {
+                int currentPage = size > 0 ? offset / size : 0;
+                long totalPages = size > 0 ? (long) Math.ceil((double) totalElements / size) : 0;
+                int lastOffset = totalPages > 0 ? (int) ((totalPages - 1) * size) : 0;
+
+                builder.header("X-Total-Count", totalElements)
+                .header("X-Total-Pages", totalPages)
+                .header("X-Page-Size", size)
+                .header("X-Current-Page", currentPage)
+                .header("X-Current-Offset", offset)
+                .header("Link", new Link(buildListHref(resourceHref, 0, size, query, status), "first", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+                .header("Link", new Link(buildListHref(resourceHref, lastOffset, size, query, status), "last", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+
+                if (hasPrevious) {
+                        builder.header("Link", new Link(buildListHref(resourceHref, Math.max(offset - size, 0), size, query, status), "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+                }
+
+                if (hasNext) {
+                        builder.header("Link", new Link(buildListHref(resourceHref, offset + size, size, query, status), "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+                }
+        }
+
+        private String buildListHref(String resourceHref, int offset, int size, String query, String status) {
+                int page = size > 0 ? offset / size : 0;
+                String href = resourceHref + "?page=" + page + "&offset=" + offset + "&size=" + size;
+
+                if (query != null && !query.isBlank()) {
+                        href += "&query=" + encode(query);
+                }
+                if (status != null && !status.isBlank()) {
+                        href += "&status=" + encode(status);
+                }
+                return href;
+        }
+
+        private String encode(String value) {
+                return URLEncoder.encode(value, StandardCharsets.UTF_8);
         }
         
         @DELETE

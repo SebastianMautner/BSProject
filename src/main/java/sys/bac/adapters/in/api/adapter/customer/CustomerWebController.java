@@ -1,6 +1,5 @@
 package sys.bac.adapters.in.api.adapter.customer;
 
-
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
@@ -26,6 +25,8 @@ import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
@@ -96,42 +97,20 @@ public class CustomerWebController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomers(@DefaultValue("") @QueryParam("query") String query,
+    @PositiveOrZero @DefaultValue("0") @QueryParam("page") int page,
     @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
     @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
         size = Math.min(size, 100);
+        if (page > 0 && offset == 0) {
+            offset = page * size;
+        }
         
         CustomersApiResult customers = cSA.getCustomers(query, offset, size);
         customers.setResult(customers.getResult().stream().map(c -> addSelfLink(c, "getCustomerWithId" + c.getId())).collect(Collectors.toList()));
         Response.ResponseBuilder builder = Response.ok(customers.getResult());
-        if(query.isBlank()) {
-            if (customers.next() && customers.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(customers.next()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(customers.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-            }
-        }
-        else {
-            if (customers.next() && customers.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(customers.next()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(customers.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.customers.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-            }
+        addPaginationHeaders(builder, Link.customers.getHref(), query, offset, size, customers.getTotalElements(), customers.next(), customers.prev());
+
+        if(!query.isBlank()) {
             builder.header("Link", new Link(Link.customers.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
         }
         
@@ -195,6 +174,42 @@ public class CustomerWebController {
         customer.setSelf(new Link(uriInfo.getBaseUri().toString() + "customers" + "/" + customer.getId(), rel, "application/json"));
         return customer;
     }
+
+    private void addPaginationHeaders(Response.ResponseBuilder builder, String resourceHref, String query, int offset, int size, long totalElements, boolean hasNext, boolean hasPrevious) {
+        int currentPage = size > 0 ? offset / size : 0;
+        long totalPages = size > 0 ? (long) Math.ceil((double) totalElements / size) : 0;
+        int lastOffset = totalPages > 0 ? (int) ((totalPages - 1) * size) : 0;
+
+        builder.header("X-Total-Count", totalElements)
+        .header("X-Total-Pages", totalPages)
+        .header("X-Page-Size", size)
+        .header("X-Current-Page", currentPage)
+        .header("X-Current-Offset", offset)
+        .header("Link", new Link(buildListHref(resourceHref, 0, size, query), "first", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(buildListHref(resourceHref, lastOffset, size, query), "last", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+
+        if (hasPrevious) {
+            builder.header("Link", new Link(buildListHref(resourceHref, Math.max(offset - size, 0), size, query), "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+        }
+
+        if (hasNext) {
+            builder.header("Link", new Link(buildListHref(resourceHref, offset + size, size, query), "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+        }
+    }
+
+    private String buildListHref(String resourceHref, int offset, int size, String query) {
+        int page = size > 0 ? offset / size : 0;
+        String href = resourceHref + "?page=" + page + "&offset=" + offset + "&size=" + size;
+
+        if (query != null && !query.isBlank()) {
+            href += "&query=" + encode(query);
+        }
+        return href;
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
     
     @DELETE
     public void ErrorDelete() {
@@ -222,4 +237,3 @@ public class CustomerWebController {
             .header("Link", Link.home.getHeaderLink(uriInfo.getBaseUri().toString()));
     }
 }
-    

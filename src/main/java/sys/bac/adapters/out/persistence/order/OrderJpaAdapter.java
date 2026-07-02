@@ -9,16 +9,14 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.EntityType;
 import jakarta.transaction.Transactional;
 import sys.bac.adapters.out.persistence.customer.CustomerJPAEntity;
 import sys.bac.adapters.out.persistence.device.DeviceJPAEntity;
 import sys.bac.application.domain.models.LongId;
 import sys.bac.application.domain.models.order.Order;
+import sys.bac.application.domain.models.order.OrderStatus;
 import sys.bac.application.domain.results.LongResult;
 import sys.bac.application.domain.results.NoContentResult;
 import sys.bac.application.domain.results.order.JpaOrdersResult;
@@ -33,32 +31,22 @@ public class OrderJpaAdapter implements OrderRepository {
     
     @Inject
     private EntityManager eM;
-    
+
     public JpaOrdersResult getAllOrders(String query, int offset, int size) {
+        return getAllOrders(query, "", offset, size);
+    }
+    
+    public JpaOrdersResult getAllOrders(String query, String status, int offset, int size) {
         List<Order> list = new ArrayList<>();
         JpaOrdersResult result =  new JpaOrdersResult();
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<OrderJPAEntity> cQ = cB.createQuery(OrderJPAEntity.class);
             Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<OrderJPAEntity> entityType = eM.getMetamodel().entity(OrderJPAEntity.class);
-                for (Attribute<? super OrderJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query, status);
+
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             cQ.orderBy(cB.asc(root.get("id")));
 
@@ -106,8 +94,6 @@ public class OrderJpaAdapter implements OrderRepository {
             eM.persist(entity);
             eM.flush();
             result.setResult(mapper.toOrder(entity));
-        // } catch(IllegalArgumentException e) {
-            // result.setError(422, "No matching entity ");
         } catch (Exception e) {
             result.setError(500, e.getMessage());
         }
@@ -149,31 +135,20 @@ public class OrderJpaAdapter implements OrderRepository {
     }
 
     public LongResult count(String query) {
+        return count(query, "");
+    }
+
+    public LongResult count(String query, String status) {
         LongResult result = new LongResult();
         long amount = -1;
         try {
             CriteriaBuilder cB = eM.getCriteriaBuilder();
             CriteriaQuery<Long> cQ = cB.createQuery(Long.class);
             Root<OrderJPAEntity> root = cQ.from(OrderJPAEntity.class);
-            
-            if (!query.isBlank()) {
-                List<Predicate> predicates = new ArrayList<>();
-                EntityType<OrderJPAEntity> entityType = eM.getMetamodel().entity(OrderJPAEntity.class);
-                for (Attribute<? super OrderJPAEntity, ?> attr : entityType.getAttributes()) {
-                    
-                    if(attr.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC) {
-                        Expression<String> expr;
-                        if (attr.getJavaType().equals(String.class)) {
-                            expr = cB.lower(root.get(attr.getName()));
-                        } else {
-                            expr = cB.lower(cB.toString(root.get(attr.getName())));
-                        }
-                        predicates.add(cB.like(expr, "%" + query.toLowerCase() + "%"));
-                    }
-                }
-                if(!predicates.isEmpty()) {
-                    cQ.where(cB.or(predicates.toArray(new Predicate[0])));
-                }
+            List<Predicate> predicates = buildSearchPredicates(cB, root, query, status);
+
+            if(!predicates.isEmpty()) {
+                cQ.where(cB.and(predicates.toArray(new Predicate[0])));
             }
             cQ.select(cB.count(root));
             amount = eM.createQuery(cQ).getSingleResult();
@@ -183,5 +158,68 @@ public class OrderJpaAdapter implements OrderRepository {
         }
         result.setResult(amount);
         return result;
+    }
+
+    private List<Predicate> buildSearchPredicates(CriteriaBuilder cB, Root<OrderJPAEntity> root, String query, String status) {
+        List<Predicate> predicates = new ArrayList<>();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+        String normalizedStatus = status == null ? "" : status.trim().toUpperCase();
+
+        if(!normalizedStatus.isBlank()) {
+            try {
+                OrderStatus statusFilter = OrderStatus.valueOf(normalizedStatus);
+                predicates.add(cB.equal(root.get("status"), statusFilter));
+            } catch (IllegalArgumentException exception) {
+                predicates.add(cB.disjunction());
+                return predicates;
+            }
+        }
+
+        if(normalizedQuery.isBlank()) {
+            return predicates;
+        }
+
+        Long customerId = extractExactId(normalizedQuery, "customer");
+        if(customerId != null && normalizedQuery.startsWith("customer:")) {
+            predicates.add(cB.equal(root.get("customer").get("customerId"), customerId));
+            return predicates;
+        }
+
+        Long deviceId = extractExactId(normalizedQuery, "device");
+        if(deviceId != null && normalizedQuery.startsWith("device:")) {
+            predicates.add(cB.equal(root.get("device").get("id"), deviceId));
+            return predicates;
+        }
+
+        Long exactId = extractExactId(normalizedQuery, "id");
+        if(exactId != null) {
+            predicates.add(cB.equal(root.get("id"), exactId));
+            return predicates;
+        }
+
+        String pattern = "%" + normalizedQuery + "%";
+        predicates.add(cB.or(
+            cB.like(cB.lower(root.get("issueNotes")), pattern),
+            cB.like(cB.lower(root.get("status").as(String.class)), pattern),
+            cB.like(cB.lower(root.get("receivedAt").as(String.class)), pattern),
+            cB.like(cB.lower(root.get("completion").as(String.class)), pattern)
+        ));
+        return predicates;
+    }
+
+    private Long extractExactId(String query, String prefix) {
+        String normalized = query.trim().toLowerCase();
+        String prefixed = prefix + ":";
+
+        if(normalized.startsWith(prefixed)) {
+            normalized = normalized.substring(prefixed.length()).trim();
+        } else if(normalized.startsWith("#")) {
+            normalized = normalized.substring(1).trim();
+        }
+
+        if(normalized.matches("\\d+")) {
+            return Long.parseLong(normalized);
+        }
+        return null;
     }
 }

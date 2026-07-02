@@ -68,7 +68,23 @@ public class OrderServiceAdapter {
         OrdersApiResult result= new OrdersApiResult(orders.getResult().getResult()
         .stream()
         .map(mapper::toDTO)
-        .collect(Collectors.toList()), orders.getResult().getTotalElements() > offset + size, offset != 0);
+        .collect(Collectors.toList()), orders.getResult().getTotalElements() > offset + size, offset != 0, orders.getResult().getTotalElements());
+        return result; 
+    }
+
+    @CacheResult(cacheName = "orders-list")
+    public OrdersApiResult getOrders(String query, String status, int offset, int size) {
+        if(status == null || status.isBlank()) {
+            return getOrders(query, offset, size);
+        }
+        OrdersResult orders = getOrdersUC.findOrders(query, status, offset, size);
+        if(orders.hasError()) {
+            throw new InternalServerErrorException(orders.getMessage());
+        }
+        OrdersApiResult result= new OrdersApiResult(orders.getResult().getResult()
+        .stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList()), orders.getResult().getTotalElements() > offset + size, offset != 0, orders.getResult().getTotalElements());
         return result; 
     }
 

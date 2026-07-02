@@ -13,6 +13,8 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -87,44 +89,23 @@ public class DeviceWebController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDevices(@DefaultValue("") @QueryParam("query") String query,
+    @PositiveOrZero @DefaultValue("0") @QueryParam("page") int page,
     @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
     @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
         size = Math.min(size, 100);
+        if (page > 0 && offset == 0) {
+            offset = page * size;
+        }
         
         DevicesApiResult devices = dSA.getDevices(query, offset, size);
         devices.setResult(devices.getResult().stream().map(d -> addSelfLink(d, "getDeviceWithId" + d.getId())).collect(Collectors.toList()));
         Response.ResponseBuilder builder = Response.ok(devices.getResult());
-        if(query.isBlank()) {
-            if (devices.next() && devices.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(devices.next()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(devices.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-            }
-        }
-        else {
-            if (devices.next() && devices.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + Math.max(offset - size, 0) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(devices.next()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset + size) + "&size=" + size + "&query=" + query, "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-                
-            } else if(devices.prev()) {
-                builder = builder
-                .header("Link", new Link(Link.devices.getHref() + "?offset=" + (offset - size) + "&size=" + size + "&query=" + query, "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
-            }
+        addPaginationHeaders(builder, Link.devices.getHref(), query, offset, size, devices.getTotalElements(), devices.next(), devices.prev());
+
+        if(!query.isBlank()) {
             builder.header("Link", new Link(Link.devices.getHref(), "clearQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
         }
+
         return dashboard(builder)
         .header("Link", new Link(Link.devices.getHref() + "?query={query}", "getNewDeviceQuery", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
         .header("Link", new Link(Link.devices.getHref(), "createDevice", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
@@ -187,6 +168,42 @@ public class DeviceWebController {
         DeviceDTO copy = new DeviceDTO(dto.getId(), dto.getCustomerId(), dto.getSerialNumber(), dto.getType(), dto.getBrand(), dto.getModel(), dto.getNotes());
         copy.setSelf(new Link(uriInfo.getBaseUri().toString() + "devices" + "/" + dto.getId(), rel, "application/json"));
         return copy;
+    }
+
+    private void addPaginationHeaders(Response.ResponseBuilder builder, String resourceHref, String query, int offset, int size, long totalElements, boolean hasNext, boolean hasPrevious) {
+        int currentPage = size > 0 ? offset / size : 0;
+        long totalPages = size > 0 ? (long) Math.ceil((double) totalElements / size) : 0;
+        int lastOffset = totalPages > 0 ? (int) ((totalPages - 1) * size) : 0;
+
+        builder.header("X-Total-Count", totalElements)
+        .header("X-Total-Pages", totalPages)
+        .header("X-Page-Size", size)
+        .header("X-Current-Page", currentPage)
+        .header("X-Current-Offset", offset)
+        .header("Link", new Link(buildListHref(resourceHref, 0, size, query), "first", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()))
+        .header("Link", new Link(buildListHref(resourceHref, lastOffset, size, query), "last", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+
+        if (hasPrevious) {
+            builder.header("Link", new Link(buildListHref(resourceHref, Math.max(offset - size, 0), size, query), "prev", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+        }
+
+        if (hasNext) {
+            builder.header("Link", new Link(buildListHref(resourceHref, offset + size, size, query), "next", "application/json").getHeaderLink(uriInfo.getBaseUri().toString()));
+        }
+    }
+
+    private String buildListHref(String resourceHref, int offset, int size, String query) {
+        int page = size > 0 ? offset / size : 0;
+        String href = resourceHref + "?page=" + page + "&offset=" + offset + "&size=" + size;
+
+        if (query != null && !query.isBlank()) {
+            href += "&query=" + encode(query);
+        }
+        return href;
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
     
     @DELETE

@@ -10,13 +10,20 @@ public class OrdersApiResult {
 
     private boolean prev;
 
+    private long totalElements;
+
     public OrdersApiResult() {
     }
 
     public OrdersApiResult(List<OrderDTO> result, boolean next, boolean prev) {
+        this(result, next, prev, result == null ? 0 : result.size());
+    }
+
+    public OrdersApiResult(List<OrderDTO> result, boolean next, boolean prev, long totalElements) {
         this.result = result;
         this.next = next;
         this.prev = prev;
+        this.totalElements = totalElements;
     }
 
     public List<OrderDTO> getResult() {
@@ -33,6 +40,14 @@ public class OrdersApiResult {
 
     public boolean prev() {
         return prev;
+    }
+
+    public long getTotalElements() {
+        return totalElements;
+    }
+
+    public void setTotalElements(long totalElements) {
+        this.totalElements = totalElements;
     }
 
     @Override

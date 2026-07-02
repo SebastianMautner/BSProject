@@ -15,13 +15,19 @@ public class GetOrdersService implements GetOrdersUseCase {
     @Inject
     private OrderRepository orderRepo;
 
+    @Override
     public OrdersResult findOrders(String query, int offset, int size) {
-        JpaOrdersResult jpaResult = orderRepo.getAllOrders(query, offset, size);
-        LongResult totalResult = orderRepo.count(query);
-        
+        return findOrders(query, "", offset, size);
+    }
+
+    @Override
+    public OrdersResult findOrders(String query, String status, int offset, int size) {
+        JpaOrdersResult jpaResult = orderRepo.getAllOrders(query, status, offset, size);
+        LongResult totalResult = orderRepo.count(query, status);
+
         OrdersResult result = new OrdersResult(new Page<>(jpaResult.getResult(), offset, size, totalResult.getResult()));
         if (jpaResult.hasError() || totalResult.hasError()) {
-            result.setError(500, jpaResult.getMessage() + "\n" + totalResult.getMessage());
+            result.setError(500, jpaResult.getMessage() + " | " + totalResult.getMessage());
         }
         return result;
     }
