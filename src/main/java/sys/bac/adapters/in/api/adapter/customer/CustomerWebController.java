@@ -99,7 +99,7 @@ public class CustomerWebController {
     public Response getCustomers(@DefaultValue("") @QueryParam("query") String query,
     @PositiveOrZero @DefaultValue("0") @QueryParam("page") int page,
     @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
-    @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
+    @PositiveOrZero @DefaultValue("20") @QueryParam("size") int size) {
         size = Math.min(size, 100);
         if (page > 0 && offset == 0) {
             offset = page * size;

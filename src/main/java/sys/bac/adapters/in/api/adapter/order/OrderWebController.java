@@ -102,7 +102,7 @@ public class OrderWebController {
         @DefaultValue("") @QueryParam("status") String status,
         @PositiveOrZero @DefaultValue("0") @QueryParam("page") int page,
         @PositiveOrZero @DefaultValue("0") @QueryParam("offset") int offset,
-        @PositiveOrZero @DefaultValue("2") @QueryParam("size") int size) {
+        @PositiveOrZero @DefaultValue("20") @QueryParam("size") int size) {
                 size = Math.min(100, size);
                 if (page > 0 && offset == 0) {
                         offset = page * size;
